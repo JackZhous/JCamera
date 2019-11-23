@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.SparseArray;
 
 import com.jz.jcamera.util.OpenGLUtil;
+import com.jz.jcamera.util.ScaleType;
 
 import java.nio.FloatBuffer;
 
@@ -20,11 +21,19 @@ public class RenderManager {
     private Context context;
     private FloatBuffer vertexBuffer;
     private FloatBuffer textureBuffer;
+    //显示纹理裁剪的缓存顶点
+    private FloatBuffer displayVertexBuffer;
+    private FloatBuffer displayTextureBuffer;
 
     private SparseArray<BaseFilter> filterArrays = new SparseArray<>();
 
     // 输入图像大小
     private int mTextureWidth, mTextureHeight;
+    //显示图像大小
+    private int mViewWidth, mViewHeight;
+
+    //坐标缓冲
+    private ScaleType scaleType = ScaleType.CENTER_CROP;
 
     private RenderManager() {
     }
@@ -82,6 +91,84 @@ public class RenderManager {
     public void setTextureSize(int width, int height) {
         mTextureWidth = width;
         mTextureHeight = height;
+    }
+
+    /**
+     * 调整滤镜
+     */
+    private void onFilterChanged(){
+        for(int i = 0; i < filterArrays.size(); i++){
+            filterArrays.get(i).onInputSizeChanged(mTextureWidth, mTextureHeight);
+            filterArrays.get(i).onDisplaySizeChanged(mViewWidth, mViewHeight);
+        }
+    }
+
+    public void setDisplaySize(int width, int height){
+        mViewHeight = height;
+        mViewWidth = width;
+        adjustCoordinate();
+        onFilterChanged();
+    }
+
+    /**
+     * surface和surfaceView尺寸不一致，调整大小
+     */
+    private void adjustCoordinate(){
+        float[] textureCoord = null;
+        float[] vertextCoord = null;
+        float[] textureVertices = OpenGLUtil.fragmentData;
+        float[] vertexVertices = OpenGLUtil.vertextData;
+        float rationMax = Math.max((float)mViewWidth / mTextureWidth
+                , (float)mViewHeight/mTextureHeight);
+        //新的款高 计算出来的是纹理宽高
+        int imageWidth = Math.round(mTextureWidth * rationMax);
+        int imageHeight = Math.round(mTextureHeight * rationMax);
+        // 获取视图跟texture的宽高比
+        float ratioWidth = (float)imageWidth / (float)mViewWidth;
+        float ratioHeight = (float)imageHeight / (float)mViewHeight;
+        //center inside 显示纹理小于视图宽高
+        if(scaleType == ScaleType.CENTER_INSIDE){
+            vertextCoord = new float[]{
+                    vertexVertices[0] / ratioHeight, vertexVertices[1] / ratioWidth,
+                    vertexVertices[2] / ratioHeight, vertexVertices[3] / ratioWidth,
+                    vertexVertices[4] / ratioHeight, vertexVertices[5] / ratioWidth,
+                    vertexVertices[6] / ratioHeight, vertexVertices[7] / ratioWidth,
+            };
+            //center crop以宽高比撑慢view，裁剪视图之外的部分,不过以下的算法不懂  算出来不是这个效果
+        }else if (scaleType == ScaleType.CENTER_CROP){
+            float distHorizontal = (1 - 1 / ratioWidth) / 2;
+            float distVertical = (1 - 1 / ratioHeight) / 2;
+            textureCoord = new float[] {
+                    addDistance(textureVertices[0], distHorizontal), addDistance(textureVertices[1], distVertical),
+                    addDistance(textureVertices[2], distHorizontal), addDistance(textureVertices[3], distVertical),
+                    addDistance(textureVertices[4], distHorizontal), addDistance(textureVertices[5], distVertical),
+                    addDistance(textureVertices[6], distHorizontal), addDistance(textureVertices[7], distVertical),
+            };
+        }
+
+        if(vertextCoord == null){
+            vertextCoord = vertexVertices;
+        }
+
+        if(textureCoord == null){
+            textureCoord = textureVertices;
+        }
+
+        displayTextureBuffer.clear();
+        displayTextureBuffer.put(textureCoord).position(0);
+        displayVertexBuffer.clear();
+        displayVertexBuffer.put(vertextCoord).position(0);
+    }
+
+
+    /**
+     * 计算距离
+     * @param coordinate
+     * @param distance
+     * @return
+     */
+    private float addDistance(float coordinate, float distance) {
+        return coordinate == 0.0f ? distance : 1 - distance;
     }
 
 }

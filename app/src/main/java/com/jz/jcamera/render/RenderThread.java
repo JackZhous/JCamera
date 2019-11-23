@@ -80,7 +80,7 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
 
 
 
-    public void surfaceCreate(Surface surface){
+    void surfaceCreate(Surface surface){
         eglHelper = new EGLHelper();
         mDisplaySurface = new WindowSurface(eglHelper, surface, false);
         mDisplaySurface.makeCurrent();
@@ -96,7 +96,7 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
         openCamera();
     }
 
-    public void surfaceCreate(SurfaceTexture surface){
+    void surfaceCreate(SurfaceTexture surface){
         eglHelper = new EGLHelper();
         mDisplaySurface = new WindowSurface(eglHelper, surface);
         mDisplaySurface.makeCurrent();
@@ -139,8 +139,13 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
         CameraManager.getInstance().releaseCamera();
     }
 
-    public void surfaceChanged(int width, int height){
-        renderManager.
-                s
+    void surfaceChanged(int width, int height){
+        renderManager.setDisplaySize(width, height);
+        startPreview();
+    }
+
+    private void startPreview(){
+        CameraManager.getInstance().startPreview();
+        isPreviewing = true;
     }
 }

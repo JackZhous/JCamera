@@ -76,7 +76,7 @@ public class RenderHandler extends Handler {
 
 
             case MSG_SURFACE_CHANGED:
-
+                thread.surfaceChanged(msg.arg1, msg.arg2);
                 break;
         }
     }
