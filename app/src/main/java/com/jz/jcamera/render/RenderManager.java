@@ -171,4 +171,8 @@ public class RenderManager {
         return coordinate == 0.0f ? distance : 1 - distance;
     }
 
+
+    public void drawFrame(int textureId, float[] matrix){
+
+    }
 }

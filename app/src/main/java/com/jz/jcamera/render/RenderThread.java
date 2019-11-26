@@ -23,6 +23,7 @@ import com.jz.jcamera.util.OpenGLUtil;
 public class RenderThread extends HandlerThread implements SurfaceTexture.OnFrameAvailableListener, Camera.PreviewCallback {
     private int mInputTexture;
     private int mCurrentTexture;
+    //surfaceTextures可以接受来自相机预览和视频解码的视频流
     private SurfaceTexture surfaceTexture;
 
     //矩阵
@@ -63,9 +64,13 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         synchronized (mSyncOperation){
+            //刷新数据
             if(isPreviewing || isRecording){
-
+                renderHandler.sendMessage(renderHandler.obtainMessage(RenderHandler.MSG_PREVIEW_CALLBACK, data));
             }
+
+            //计算fps
+//            if()
         }
     }
     /**
@@ -76,6 +81,20 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
         if (cameraParam.cameraCallback != null) {
             cameraParam.cameraCallback.onPreviewCallback(data);
         }
+        drawFrame();
+    }
+
+
+    private void drawFrame(){
+        if(mDisplaySurface == null || surfaceTexture == null){
+            return;
+        }
+
+        mDisplaySurface.makeCurrent();
+        //surface关联的opengl的纹理对象将被更新为最新的图像，图像来自相机预览或者视频解码，必须在opengl渲染线程中调用
+        surfaceTexture.updateTexImage();
+        //纹理转换矩阵
+        surfaceTexture.getTransformMatrix(mMatrix);
     }
 
 

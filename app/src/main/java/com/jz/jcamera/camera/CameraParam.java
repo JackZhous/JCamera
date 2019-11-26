@@ -81,7 +81,7 @@ public class CameraParam {
 //        gallerySelectedListener = null;
 //        captureListener = null;
 //        musicSelectListener = null;
-//        cameraCallback = null;
+        cameraCallback = null;
 //        captureCallback = null;
 //        fpsCallback = null;
 //        showCompare = false;
