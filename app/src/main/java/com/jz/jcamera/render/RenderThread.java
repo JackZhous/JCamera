@@ -95,6 +95,9 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
         surfaceTexture.updateTexImage();
         //纹理转换矩阵
         surfaceTexture.getTransformMatrix(mMatrix);
+        renderManager.drawFrame(mInputTexture, mMatrix);
+
+        mDisplaySurface.swapBuffers();
     }
 
 

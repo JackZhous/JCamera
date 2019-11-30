@@ -74,6 +74,7 @@ public class RenderManager {
     private void initFilters(){
         releaseFilters();
         filterArrays.put(BaseFilter.CameraIndex, new GLImageOESInputFilter(context));
+        filterArrays.put(1, new BaseFilter(context));
     }
 
     private void releaseFilters(){
@@ -173,6 +174,13 @@ public class RenderManager {
 
 
     public void drawFrame(int textureId, float[] matrix){
+        int currentId = textureId;
+        BaseFilter filter = filterArrays.get(0);
+        if(filter instanceof GLImageOESInputFilter){
+            ((GLImageOESInputFilter) filter).setmTransformMatrix(matrix);
+        }
+        filter.drawFrameBuffer(currentId, vertexBuffer, textureBuffer);
 
+        filterArrays.get(1).drawFrameBuffer(currentId, displayVertexBuffer, displayTextureBuffer);
     }
 }
