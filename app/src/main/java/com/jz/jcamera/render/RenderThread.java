@@ -10,6 +10,7 @@ import android.view.Surface;
 import com.jz.jcamera.camera.CameraManager;
 import com.jz.jcamera.camera.CameraParam;
 import com.jz.jcamera.opengl.EGLHelper;
+import com.jz.jcamera.util.JLog;
 import com.jz.jcamera.util.OpenGLUtil;
 
 /**
@@ -64,6 +65,7 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         synchronized (mSyncOperation){
+            JLog.i("onPreviewFrame");
             //刷新数据
             if(isPreviewing || isRecording){
                 renderHandler.sendMessage(renderHandler.obtainMessage(RenderHandler.MSG_PREVIEW_CALLBACK, data));
@@ -81,6 +83,7 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
         if (cameraParam.cameraCallback != null) {
             cameraParam.cameraCallback.onPreviewCallback(data);
         }
+        JLog.i("onPreviewCallback");
         drawFrame();
     }
 
@@ -119,6 +122,7 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
     }
 
     void surfaceCreate(SurfaceTexture surface){
+        JLog.i("surfaceCreate");
         eglHelper = new EGLHelper();
         mDisplaySurface = new WindowSurface(eglHelper, surface);
         mDisplaySurface.makeCurrent();

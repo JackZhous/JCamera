@@ -4,7 +4,7 @@
 precision mediump float;
 varying vec2 textureCoordinate;
 //samplerExternalOES代替贴图片时的sampler2D,作用就是和surfaceTexture配合进行纹理更新和格式转换
-uniform sampleExternalOES inputTexture;
+uniform samplerExternalOES inputTexture;
 void main(){
     gl_FragColor = texture2D(inputTexture, textureCoordinate);
 }

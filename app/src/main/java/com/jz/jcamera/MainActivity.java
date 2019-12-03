@@ -7,6 +7,7 @@ import android.view.View;
 
 import com.jz.jcamera.base.BaseActivity;
 import com.jz.jcamera.controller.CamerPresenter;
+import com.jz.jcamera.util.JLog;
 import com.tbruyelle.rxpermissions2.Permission;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
@@ -17,7 +18,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
 
 
     TextureView textureView;
-    private CamerPresenter presenter = CamerPresenter.getInstance();
+    private CamerPresenter presenter;
 
 
     @Override
@@ -27,6 +28,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
 
     @Override
     protected void init() {
+        presenter = CamerPresenter.getInstance();
+        presenter.init(this);
         initView();
         initPermission();
     }
@@ -36,6 +39,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         $(R.id.ic_take).setOnClickListener(this);
         $(R.id.ic_tx).setOnClickListener(this);
         $(R.id.ic_lib).setOnClickListener(this);
+        textureView.setSurfaceTextureListener(this);
     }
 
     @Override
@@ -71,6 +75,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+        JLog.i("texture view onSurfaceTextureAvailable");
         presenter.bindSurface(surface);
         presenter.changePreviewSize(width, height);
     }

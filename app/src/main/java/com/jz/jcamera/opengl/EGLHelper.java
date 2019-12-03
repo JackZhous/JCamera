@@ -57,7 +57,7 @@ public class EGLHelper {
             return;
         }
 
-        initGL3(3, null);
+        initGL3(3, EGL14.EGL_NO_CONTEXT);
         if(eglContext == EGL14.EGL_NO_CONTEXT){
             initGL2(2, null);
         }
