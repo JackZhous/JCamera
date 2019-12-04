@@ -56,6 +56,16 @@ public class RenderManager {
             textureBuffer.clear();
             textureBuffer = null;
         }
+
+        if(displayVertexBuffer != null){
+            displayVertexBuffer.clear();
+            displayVertexBuffer = null;
+        }
+
+        if(displayTextureBuffer != null){
+            displayTextureBuffer.clear();
+            displayTextureBuffer = null;
+        }
     }
 
     public void init(Context context){
@@ -68,6 +78,8 @@ public class RenderManager {
         releaseBuffer();
         vertexBuffer = OpenGLUtil.createFloatBuffer(OpenGLUtil.vertextData);
         textureBuffer = OpenGLUtil.createFloatBuffer(OpenGLUtil.fragmentData);
+        displayVertexBuffer = OpenGLUtil.createFloatBuffer(OpenGLUtil.vertextData);
+        displayTextureBuffer = OpenGLUtil.createFloatBuffer(OpenGLUtil.fragmentData);
     }
 
 
@@ -101,6 +113,7 @@ public class RenderManager {
         for(int i = 0; i < filterArrays.size(); i++){
             filterArrays.get(i).onInputSizeChanged(mTextureWidth, mTextureHeight);
             filterArrays.get(i).onDisplaySizeChanged(mViewWidth, mViewHeight);
+            filterArrays.get(i).initFrameBuffer(mTextureWidth, mTextureHeight);
         }
     }
 
@@ -179,8 +192,18 @@ public class RenderManager {
         if(filter instanceof GLImageOESInputFilter){
             ((GLImageOESInputFilter) filter).setmTransformMatrix(matrix);
         }
-        filter.drawFrameBuffer(currentId, vertexBuffer, textureBuffer);
+        //这里没有使用返回id导致画面没有画出来
+        currentId = filter.drawFrameBuffer(currentId, vertexBuffer, textureBuffer);
 
-        filterArrays.get(1).drawFrameBuffer(currentId, displayVertexBuffer, displayTextureBuffer);
+        filterArrays.get(1).drawFrame(currentId, displayVertexBuffer, displayTextureBuffer);
+    }
+
+    /**
+     * 释放资源
+     */
+    public void release() {
+        releaseBuffer();
+        releaseFilters();
+        context = null;
     }
 }

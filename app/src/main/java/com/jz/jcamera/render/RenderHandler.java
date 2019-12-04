@@ -82,6 +82,11 @@ public class RenderHandler extends Handler {
             case MSG_PREVIEW_CALLBACK:
                 thread.onPreviewCallback((byte[]) msg.obj);
                 break;
+
+
+            case MSG_SURFACE_DESTROYED:
+                thread.surfaceDestroyed();
+                break;
         }
     }
 }

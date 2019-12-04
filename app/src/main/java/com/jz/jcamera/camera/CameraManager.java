@@ -51,6 +51,7 @@ public class CameraManager {
 
     public void openCamera(Context context){
         try {
+            //Camera.CameraInfo.CAMERA_FACING_FRONT
             camera = Camera.open();
         } catch (Exception e) {
             e.printStackTrace();
@@ -131,15 +132,6 @@ public class CameraManager {
         int imagheight = Math.round(mTextureHeight * rrationMax);
     }
 
-    /**
-     * 设置纹理显示大小
-     * @param width
-     * @param height
-     */
-    public void setDisplaySize(int width, int height){
-        viewHeight = height;
-        viewWidth = width;
-    }
 
     public void startPreview(){
         if(camera == null){

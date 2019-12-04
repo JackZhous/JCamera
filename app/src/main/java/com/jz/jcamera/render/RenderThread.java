@@ -65,7 +65,6 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         synchronized (mSyncOperation){
-            JLog.i("onPreviewFrame");
             //刷新数据
             if(isPreviewing || isRecording){
                 renderHandler.sendMessage(renderHandler.obtainMessage(RenderHandler.MSG_PREVIEW_CALLBACK, data));
@@ -101,6 +100,24 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
         renderManager.drawFrame(mInputTexture, mMatrix);
 
         mDisplaySurface.swapBuffers();
+    }
+
+    public void surfaceDestroyed(){
+        mDisplaySurface.makeCurrent();
+        renderManager.release();
+        releaseCamera();
+        if (surfaceTexture != null) {
+            surfaceTexture.release();
+            surfaceTexture = null;
+        }
+        if (mDisplaySurface != null) {
+            mDisplaySurface.release();
+            mDisplaySurface = null;
+        }
+        if (eglHelper != null) {
+            eglHelper.release();
+            eglHelper = null;
+        }
     }
 
 
@@ -144,6 +161,7 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
         CameraManager.getInstance().openCamera(context);
         CameraManager.getInstance().setPreviewSurface(surfaceTexture);
         CameraManager.getInstance().setPreviewCallback(this);
+        calculateImageSize();
         if(cameraParam.cameraCallback != null){
             cameraParam.cameraCallback.onCameraOpened();
         }
