@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.os.Handler;
+import android.util.Size;
 import android.view.Surface;
 
 import com.jz.jcamera.util.JLog;
@@ -27,7 +29,7 @@ import java.util.List;
  * 而get的属性时确实一个List，实质也是通过map获取属性后，在字符串split分割为list的
  * @email jackzhouyu@foxmail.com
  **/
-public class CameraManager {
+public class CameraManager implements CameraHelper{
 
     private Camera camera;
     //摄像头id
@@ -49,7 +51,10 @@ public class CameraManager {
         private static CameraManager instance = new CameraManager();
     }
 
-    public void openCamera(Context context){
+
+
+    @Override
+    public void openCamera(Context context, Handler handler){
         try {
             //Camera.CameraInfo.CAMERA_FACING_FRONT
             camera = Camera.open();
@@ -64,7 +69,6 @@ public class CameraManager {
         setPreviewSize(camera, CameraParam.getInstance().expectWidth, CameraParam.getInstance().expectHeight);
         setPictureSize(camera, CameraParam.getInstance().expectWidth, CameraParam.getInstance().expectHeight);
         camera.setDisplayOrientation(calculateCameraPreviewOrientation((Activity) context));
-
     }
 
     private int calculateCameraPreviewOrientation(Activity activity) {

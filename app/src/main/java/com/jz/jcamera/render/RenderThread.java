@@ -4,9 +4,13 @@ import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES30;
+import android.os.Build;
 import android.os.HandlerThread;
+import android.util.Size;
 import android.view.Surface;
 
+import com.jz.jcamera.camera.Camera2Manager;
+import com.jz.jcamera.camera.CameraHelper;
 import com.jz.jcamera.camera.CameraManager;
 import com.jz.jcamera.camera.CameraParam;
 import com.jz.jcamera.opengl.EGLHelper;
@@ -26,7 +30,7 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
     private int mCurrentTexture;
     //surfaceTextures可以接受来自相机预览和视频解码的视频流
     private SurfaceTexture surfaceTexture;
-
+    private CameraHelper cameraHelper;
     //矩阵
     private final float[] mMatrix = new float[16];
 
@@ -51,6 +55,11 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
         super(name);
         this.context = context;
         renderManager = RenderManager.getInstance();
+        if(Build.VERSION.SDK_INT < 21){
+            cameraHelper = CameraManager.getInstance();
+        }else {
+            cameraHelper = new Camera2Manager(context);
+        }
     }
 
     public void setRenderHandler(RenderHandler renderHandler) {
@@ -158,7 +167,7 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
 
     private void openCamera(){
         releaseCamera();
-        CameraManager.getInstance().openCamera(context);
+        cameraHelper.openCamera(context);
         CameraManager.getInstance().setPreviewSurface(surfaceTexture);
         CameraManager.getInstance().setPreviewCallback(this);
         calculateImageSize();

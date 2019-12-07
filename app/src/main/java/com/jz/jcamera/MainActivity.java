@@ -2,10 +2,13 @@ package com.jz.jcamera;
 
 import android.Manifest;
 import android.graphics.SurfaceTexture;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.view.TextureView;
 import android.view.View;
 
 import com.jz.jcamera.base.BaseActivity;
+import com.jz.jcamera.camera.Camera2Manager;
 import com.jz.jcamera.controller.CamerPresenter;
 import com.jz.jcamera.util.JLog;
 import com.tbruyelle.rxpermissions2.Permission;
@@ -26,12 +29,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         return R.layout.activity_main;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void init() {
-        presenter = CamerPresenter.getInstance();
-        presenter.init(this);
-        initView();
-        initPermission();
+
+        Camera2Manager manager = new Camera2Manager(this);
+//        presenter = CamerPresenter.getInstance();
+//        presenter.init(this);
+//        initView();
+//        initPermission();
     }
 
     private void initView(){
