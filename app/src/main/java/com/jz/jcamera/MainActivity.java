@@ -33,11 +33,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     @Override
     protected void init() {
 
-        Camera2Manager manager = new Camera2Manager(this);
-//        presenter = CamerPresenter.getInstance();
-//        presenter.init(this);
-//        initView();
-//        initPermission();
+        presenter = CamerPresenter.getInstance();
+        presenter.init(this);
+        initView();
+        initPermission();
     }
 
     private void initView(){

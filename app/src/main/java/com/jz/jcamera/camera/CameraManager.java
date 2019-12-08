@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.util.Size;
 import android.view.Surface;
 
+import com.jz.jcamera.render.RenderHandler;
 import com.jz.jcamera.util.JLog;
 import com.jz.jcamera.util.OpenGLUtil;
 
@@ -39,7 +40,14 @@ public class CameraManager implements CameraHelper{
     private int viewHeight;
     // 输入图像大小
     private int mTextureWidth, mTextureHeight;
+    private Handler handler;
+
     private CameraManager() {
+    }
+
+    @Override
+    public void setHandler(Handler handler) {
+        this.handler = handler;
     }
 
     public static CameraManager getInstance(){
@@ -51,7 +59,18 @@ public class CameraManager implements CameraHelper{
         private static CameraManager instance = new CameraManager();
     }
 
+    @Override
+    public void initCamera(SurfaceTexture texture) {
+    }
 
+    @Override
+    public void startPreview(Handler handler) {
+        if(camera == null || texture == null){
+            return;
+        }
+        JLog.i("startPreview");
+        camera.startPreview();
+    }
 
     @Override
     public void openCamera(Context context, Handler handler){
@@ -69,6 +88,7 @@ public class CameraManager implements CameraHelper{
         setPreviewSize(camera, CameraParam.getInstance().expectWidth, CameraParam.getInstance().expectHeight);
         setPictureSize(camera, CameraParam.getInstance().expectWidth, CameraParam.getInstance().expectHeight);
         camera.setDisplayOrientation(calculateCameraPreviewOrientation((Activity) context));
+        handler.sendEmptyMessage(RenderHandler.MSG_CAMERA_OPENDED);
     }
 
     private int calculateCameraPreviewOrientation(Activity activity) {
@@ -137,13 +157,7 @@ public class CameraManager implements CameraHelper{
     }
 
 
-    public void startPreview(){
-        if(camera == null){
-            return;
-        }
 
-        camera.startPreview();
-    }
 
 
     public void stopPreview(){
@@ -158,8 +172,20 @@ public class CameraManager implements CameraHelper{
         if(camera == null){
             return;
         }
-
         camera.release();
+    }
+
+    private SurfaceTexture texture = null;
+    @Override
+    public void setPreviewCallback(SurfaceTexture texture) {
+        try {
+            this.texture = texture;
+            camera.setPreviewTexture(texture);
+            startPreview(handler);
+        } catch (IOException e) {
+            e.printStackTrace();
+            JLog.i("设置相机预览surface失败");
+        }
     }
 
     private boolean checkSupportFalsh(Camera.Parameters parameters){

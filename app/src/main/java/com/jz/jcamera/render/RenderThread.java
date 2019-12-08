@@ -64,11 +64,12 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
 
     public void setRenderHandler(RenderHandler renderHandler) {
         this.renderHandler = renderHandler;
+        cameraHelper.setHandler(renderHandler);
     }
 
     @Override
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-
+//        openCamera();
     }
 
     @Override
@@ -96,7 +97,7 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
     }
 
 
-    private void drawFrame(){
+    void drawFrame(){
         if(mDisplaySurface == null || surfaceTexture == null){
             return;
         }
@@ -143,8 +144,6 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
         mInputTexture = OpenGLUtil.createOESTexture();      //创建OES类型的纹理，目前只知道能自动yuv->rgb格式转换
         surfaceTexture = new SurfaceTexture(mInputTexture);
         surfaceTexture.setOnFrameAvailableListener(this);
-
-        openCamera();
     }
 
     void surfaceCreate(SurfaceTexture surface){
@@ -160,16 +159,23 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
         mInputTexture = OpenGLUtil.createOESTexture();      //创建OES类型的纹理，目前只知道能自动yuv->rgb格式转换
         surfaceTexture = new SurfaceTexture(mInputTexture);
         surfaceTexture.setOnFrameAvailableListener(this);
-
         openCamera();
     }
 
 
     private void openCamera(){
+        JLog.i("open camera");
         releaseCamera();
-        cameraHelper.openCamera(context);
-        CameraManager.getInstance().setPreviewSurface(surfaceTexture);
-        CameraManager.getInstance().setPreviewCallback(this);
+        cameraHelper.initCamera(surfaceTexture);
+        cameraHelper.openCamera(context, renderHandler);
+    }
+
+    void setPreview(){
+        JLog.i("set preview");
+        cameraHelper.setPreviewCallback(surfaceTexture);
+        if(cameraHelper instanceof  CameraManager){
+            ((CameraManager) cameraHelper).setPreviewCallback(this);
+        }
         calculateImageSize();
         if(cameraParam.cameraCallback != null){
             cameraParam.cameraCallback.onCameraOpened();
@@ -189,16 +195,18 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
 
     private void releaseCamera(){
         isPreviewing = false;
-        CameraManager.getInstance().releaseCamera();
+        cameraHelper.stopPreview();
+        cameraHelper.releaseCamera();
     }
 
     void surfaceChanged(int width, int height){
+        JLog.i("surfaceChanged");
         renderManager.setDisplaySize(width, height);
         startPreview();
     }
 
     private void startPreview(){
-        CameraManager.getInstance().startPreview();
+        cameraHelper.startPreview(renderHandler);
         isPreviewing = true;
     }
 }

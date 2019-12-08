@@ -3,6 +3,8 @@ package com.jz.jcamera.render;
 import android.content.Context;
 import android.util.SparseArray;
 
+import com.jz.jcamera.camera.Camera2Manager;
+import com.jz.jcamera.camera.CameraParam;
 import com.jz.jcamera.util.OpenGLUtil;
 import com.jz.jcamera.util.ScaleType;
 
@@ -28,7 +30,7 @@ public class RenderManager {
     private SparseArray<BaseFilter> filterArrays = new SparseArray<>();
 
     // 输入图像大小
-    private int mTextureWidth, mTextureHeight;
+    private int mTextureWidth = CameraParam.DEFAULT_16_9_WIDTH, mTextureHeight = CameraParam.DEFAULT_16_9_HEIGHT;
     //显示图像大小
     private int mViewWidth, mViewHeight;
 

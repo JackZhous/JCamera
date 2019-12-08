@@ -47,6 +47,11 @@ public class RenderHandler extends Handler {
     public static final int MSG_CHANGE_DYNAMIC_MAKEUP = 0x16;
     // 切换动态动态资源
     public static final int MSG_CHANGE_DYNAMIC_RESOURCE = 0x17;
+    //直接drawFrame
+    public static final int MSG_DRAW_FRAME = 0x18;
+
+    //相机打开
+    public static final int MSG_CAMERA_OPENDED = 0x19;
 
     private WeakReference<RenderThread> mWeakReference;
 
@@ -86,6 +91,15 @@ public class RenderHandler extends Handler {
 
             case MSG_SURFACE_DESTROYED:
                 thread.surfaceDestroyed();
+                break;
+
+
+            case MSG_DRAW_FRAME:
+                thread.drawFrame();
+                break;
+
+            case MSG_CAMERA_OPENDED:
+                thread.setPreview();
                 break;
         }
     }

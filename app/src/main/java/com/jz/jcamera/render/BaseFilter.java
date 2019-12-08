@@ -5,6 +5,7 @@ import android.graphics.PointF;
 import android.opengl.GLES30;
 import android.text.TextUtils;
 
+import com.jz.jcamera.util.JLog;
 import com.jz.jcamera.util.OpenGLUtil;
 
 import java.nio.FloatBuffer;
@@ -178,7 +179,7 @@ public class BaseFilter {
                 || !mIsInitialized || !mFilterEnable) {
             return textureId;
         }
-
+        JLog.i("fbo size " + mFrameWidth + " " + mFrameHeight);
         // 绑定FBO
         GLES30.glViewport(0, 0, mFrameWidth, mFrameHeight);
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, mFrameBuffers[0]);

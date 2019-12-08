@@ -81,6 +81,7 @@ public class OpenGLUtil {
 
     public static int createOESTexture(){
         return createTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES);
+//        return createTexture(GLES30.GL_TEXTURE_2D);
     }
 
     private static int createTexture(int type){
