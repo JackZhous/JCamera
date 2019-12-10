@@ -42,6 +42,7 @@ public class Camera2Manager implements CameraHelper{
     private Surface surface;
     private Handler handler;
     private boolean previewTask;
+    private String cameraId = "0";
 
     public Camera2Manager(Context context){
         this.context = context;
@@ -56,7 +57,7 @@ public class Camera2Manager implements CameraHelper{
     public void initCamera(SurfaceTexture texture){
         try {
             //0是后置摄像头
-            CameraCharacteristics param = service.getCameraCharacteristics("0");
+            CameraCharacteristics param = service.getCameraCharacteristics(cameraId);
             StreamConfigurationMap map = param.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             Size[] size = map.getOutputSizes(SurfaceTexture.class);     //获取预览尺寸类型
 //            for(Size s : size){
@@ -67,7 +68,10 @@ public class Camera2Manager implements CameraHelper{
 //                    return;
 //                }
 //            }
-            texture.setDefaultBufferSize(DEFAULT_16_9_WIDTH, DEFAULT_16_9_HEIGHT);
+            paramC.previewHeight = size[0].getHeight();
+            paramC.previewWidth = size[0].getWidth();
+            JLog.i("width height camera " + paramC.previewWidth+ "  "+paramC.previewHeight);
+            texture.setDefaultBufferSize(paramC.previewWidth, paramC.previewHeight);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -78,7 +82,7 @@ public class Camera2Manager implements CameraHelper{
     @Override
     public void openCamera(Context context, Handler handler) {
         try {
-            service.openCamera("0", stateCallback, handler);
+            service.openCamera(cameraId, stateCallback, handler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }

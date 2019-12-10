@@ -79,6 +79,33 @@ public class OpenGLUtil {
         checkGlError("createFrameBuffer");
     }
 
+    /**
+     * 绑定纹理
+     * @param location  句柄
+     * @param texture   纹理id
+     * @param index     索引
+     */
+    public static void bindTexture(int location, int texture, int index) {
+        bindTexture(location, texture, index, GLES30.GL_TEXTURE_2D);
+    }
+
+    /**
+     * 绑定纹理
+     * @param location  句柄
+     * @param texture   纹理值
+     * @param index     绑定的位置
+     * @param textureType 纹理类型
+     */
+    public static void bindTexture(int location, int texture, int index, int textureType) {
+        // 最多支持绑定32个纹理
+        if (index > 31) {
+            throw new IllegalArgumentException("index must be no more than 31!");
+        }
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE0 + index);
+        GLES30.glBindTexture(textureType, texture);
+        GLES30.glUniform1i(location, index);
+    }
+
     public static int createOESTexture(){
         return createTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES);
 //        return createTexture(GLES30.GL_TEXTURE_2D);
@@ -123,7 +150,8 @@ public class OpenGLUtil {
         int[] compiled = new int[1];
         GLES30.glGetShaderiv(shader, GLES30.GL_COMPILE_STATUS, compiled, 0);
         if(compiled[0] == 0){
-            JLog.error("could not compiled shader, type " + shaderType);
+            String msg = GLES30.glGetShaderInfoLog(shader);
+            JLog.error(msg + shaderType);
             GLES30.glDeleteShader(shader);
             shader = 0;
         }

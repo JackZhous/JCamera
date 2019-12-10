@@ -88,7 +88,8 @@ public class RenderManager {
     private void initFilters(){
         releaseFilters();
         filterArrays.put(BaseFilter.CameraIndex, new GLImageOESInputFilter(context));
-        filterArrays.put(1, new BaseFilter(context));
+        filterArrays.put(1, new GLSplitScreenGuassFilter(context));
+//        filterArrays.put(1, new BaseFilter(context));
     }
 
     private void releaseFilters(){
@@ -194,8 +195,10 @@ public class RenderManager {
         if(filter instanceof GLImageOESInputFilter){
             ((GLImageOESInputFilter) filter).setmTransformMatrix(matrix);
         }
-        //这里没有使用返回id导致画面没有画出来
-        currentId = filter.drawFrameBuffer(currentId, vertexBuffer, textureBuffer);
+        for(int i = 0; i < filterArrays.size() - 1; i++){
+            //这里没有使用返回id导致画面没有画出来
+            currentId = filter.drawFrameBuffer(currentId, vertexBuffer, textureBuffer);
+        }
 
         filterArrays.get(1).drawFrame(currentId, displayVertexBuffer, displayTextureBuffer);
     }
