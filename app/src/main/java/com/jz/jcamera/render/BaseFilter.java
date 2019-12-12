@@ -150,6 +150,7 @@ public class BaseFilter {
 
         // 设置视口大小
         GLES30.glViewport(0, 0, mDisplayWidth, mDisplayHeight);
+        JLog.i("fbo size " + mDisplayWidth + " " + mDisplayHeight);
         GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT);
 
@@ -179,10 +180,10 @@ public class BaseFilter {
                 || !mIsInitialized || !mFilterEnable) {
             return textureId;
         }
-        JLog.i("fbo size " + mFrameWidth + " " + mFrameHeight);
         // 绑定FBO
         GLES30.glViewport(0, 0, mFrameWidth, mFrameHeight);
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, mFrameBuffers[0]);
+        JLog.i("fbo size " + mFrameWidth + " " + mFrameHeight);
         // 使用当前的program
         GLES30.glUseProgram(mProgramHandle);
         // 运行延时任务，这个要放在glUseProgram之后，要不然某些设置项会不生效
@@ -382,6 +383,7 @@ public class BaseFilter {
         runOnDraw(new Runnable() {
             @Override
             public void run() {
+                JLog.i("float " + floatValue);
                 GLES30.glUniform1f(location, floatValue);
             }
         });

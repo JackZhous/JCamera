@@ -5,6 +5,7 @@ import android.util.SparseArray;
 
 import com.jz.jcamera.camera.Camera2Manager;
 import com.jz.jcamera.camera.CameraParam;
+import com.jz.jcamera.util.JLog;
 import com.jz.jcamera.util.OpenGLUtil;
 import com.jz.jcamera.util.ScaleType;
 
@@ -30,7 +31,7 @@ public class RenderManager {
     private SparseArray<BaseFilter> filterArrays = new SparseArray<>();
 
     // 输入图像大小
-    private int mTextureWidth = CameraParam.DEFAULT_16_9_WIDTH, mTextureHeight = CameraParam.DEFAULT_16_9_HEIGHT;
+    private int mTextureWidth = 1080, mTextureHeight = 1920;
     //显示图像大小
     private int mViewWidth, mViewHeight;
 
@@ -89,7 +90,7 @@ public class RenderManager {
         releaseFilters();
         filterArrays.put(BaseFilter.CameraIndex, new GLImageOESInputFilter(context));
         filterArrays.put(1, new GLSplitScreenGuassFilter(context));
-//        filterArrays.put(1, new BaseFilter(context));
+//        filterArrays.put(2, new BaseFilter(context));
     }
 
     private void releaseFilters(){
@@ -107,6 +108,7 @@ public class RenderManager {
     public void setTextureSize(int width, int height) {
         mTextureWidth = width;
         mTextureHeight = height;
+
     }
 
     /**
@@ -117,6 +119,8 @@ public class RenderManager {
             filterArrays.get(i).onInputSizeChanged(mTextureWidth, mTextureHeight);
             filterArrays.get(i).onDisplaySizeChanged(mViewWidth, mViewHeight);
             filterArrays.get(i).initFrameBuffer(mTextureWidth, mTextureHeight);
+            JLog.i("texture width height " + mTextureWidth + " " + mTextureHeight);
+            JLog.i("view width height " + mViewWidth + " " + mViewHeight);
         }
     }
 
@@ -137,7 +141,7 @@ public class RenderManager {
         float[] vertexVertices = OpenGLUtil.vertextData;
         float rationMax = Math.max((float)mViewWidth / mTextureWidth
                 , (float)mViewHeight/mTextureHeight);
-        //新的款高 计算出来的是纹理宽高
+        //新的款高 计算出来的是输出纹理宽高
         int imageWidth = Math.round(mTextureWidth * rationMax);
         int imageHeight = Math.round(mTextureHeight * rationMax);
         // 获取视图跟texture的宽高比

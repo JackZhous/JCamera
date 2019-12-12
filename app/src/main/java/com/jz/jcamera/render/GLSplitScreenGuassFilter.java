@@ -21,7 +21,7 @@ public class GLSplitScreenGuassFilter extends BaseFilter{
     private int XStepHandler;
     private int YStepHandler;
     public GLSplitScreenGuassFilter(Context context) {
-        this(context, VERTEX_SHADER, OpenGLUtil.readRawFile(context, R.raw.fragment_split_screen_guass));
+        this(context, OpenGLUtil.readRawFile(context, R.raw.vertex_split_screen_guass), OpenGLUtil.readRawFile(context, R.raw.fragment_split_screen_guass));
     }
 
     public GLSplitScreenGuassFilter(Context context, String vertexShader, String fragmentShader) {
@@ -46,7 +46,7 @@ public class GLSplitScreenGuassFilter extends BaseFilter{
         super.onDisplaySizeChanged(width, height);
         setFloat(XLenHandler, width);
         setFloat(YLenHandler, height);
-        setFloat(XStepHandler, 1.0f/width);
-        setFloat(YStepHandler, 1.0f/height);
+        setFloat(XStepHandler, 6.0f/width);
+        setFloat(YStepHandler, 6.0f/height);
     }
 }

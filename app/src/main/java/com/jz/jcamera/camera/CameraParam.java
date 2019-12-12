@@ -17,8 +17,8 @@ public class CameraParam {
     public static final int DEFAULT_RECORD_TIME = 15000;
 
     // 16:9的默认宽高(理想值) 2048 1536 1920 1440 2160 1080
-    public static final int DEFAULT_16_9_WIDTH = 1536;
-    public static final int DEFAULT_16_9_HEIGHT = 2048;
+    public static final int DEFAULT_16_9_WIDTH = 1080;
+    public static final int DEFAULT_16_9_HEIGHT = 1920;
     // 4:3的默认宽高(理想值)
     public static final int DEFAULT_4_3_WIDTH = 1024;
     public static final int DEFAULT_4_3_HEIGHT = 768;

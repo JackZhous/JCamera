@@ -9,6 +9,7 @@ import android.view.View;
 
 import com.jz.jcamera.base.BaseActivity;
 import com.jz.jcamera.camera.Camera2Manager;
+import com.jz.jcamera.camera.CameraParam;
 import com.jz.jcamera.controller.CamerPresenter;
 import com.jz.jcamera.util.JLog;
 import com.tbruyelle.rxpermissions2.Permission;
@@ -81,6 +82,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         JLog.i("texture view onSurfaceTextureAvailable");
+        CameraParam.getInstance().previewWidth = width;
+        CameraParam.getInstance().previewHeight = height;
         presenter.bindSurface(surface);
         presenter.changePreviewSize(width, height);
     }

@@ -42,7 +42,7 @@ public class Camera2Manager implements CameraHelper{
     private Surface surface;
     private Handler handler;
     private boolean previewTask;
-    private String cameraId = "0";
+    private String cameraId = "1";
 
     public Camera2Manager(Context context){
         this.context = context;
@@ -68,10 +68,11 @@ public class Camera2Manager implements CameraHelper{
 //                    return;
 //                }
 //            }
-            paramC.previewHeight = size[0].getHeight();
-            paramC.previewWidth = size[0].getWidth();
-            JLog.i("width height camera " + paramC.previewWidth+ "  "+paramC.previewHeight);
-            texture.setDefaultBufferSize(paramC.previewWidth, paramC.previewHeight);
+//            paramC.previewHeight = size[0].getHeight();
+//            paramC.previewWidth = size[0].getWidth();
+            JLog.i("width height camera " + size[0].getWidth()+ "  "+size[0].getHeight());
+//            texture.setDefaultBufferSize(paramC.expectHeight, paramC.expectWidth);
+            texture.setDefaultBufferSize(size[0].getWidth(), size[0].getHeight());
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }

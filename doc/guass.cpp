@@ -4,13 +4,13 @@
 #include <iostream>
 using namespace std;
 
-#define N 3
+#define N 2
 #define PI 3.141592653
 
 int main()
 {
     double a[2 * N + 1][2 * N + 1];    // 高斯模板;
-    double r = 0.5;                     // 高斯半径;
+    double r = 1;                     // 高斯半径;
     double A = 1 / (2 * PI * r * r);
 
 	cout << "方差半径r：" << r <<endl;
