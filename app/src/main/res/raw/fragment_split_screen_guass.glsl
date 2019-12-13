@@ -4,7 +4,7 @@ uniform sampler2D inputTexture; // 原始图像
 
 varying highp vec2 blurtexCoor[7];
 void main() {
-    vec4 color;
+    lowp vec4 color = vec4(0.0);
     if(blurtexCoor[0].y >= 0.25 && blurtexCoor[0].y <= 0.75){
         color = texture2D(inputTexture, blurtexCoor[0]);
     }else{
@@ -16,7 +16,6 @@ void main() {
         color += texture2D(inputTexture, blurtexCoor[4]) * 0.11;
         color += texture2D(inputTexture, blurtexCoor[5]) * 0.09;
         color += texture2D(inputTexture, blurtexCoor[6]) * 0.09;
-        color = vec4(color.b, color.g, color.r, color.a);
     }
     gl_FragColor = color;
 }

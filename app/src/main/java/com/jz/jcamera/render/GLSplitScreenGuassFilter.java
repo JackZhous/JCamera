@@ -44,7 +44,7 @@ public class GLSplitScreenGuassFilter extends BaseFilter{
     @Override
     public void onDisplaySizeChanged(int width, int height) {
         super.onDisplaySizeChanged(width, height);
-        setFloat(XStepHandler, 12.0f/width);
-        setFloat(YStepHandler, 12.0f/height);
+        setFloat(XStepHandler, 5.0f/width);
+        setFloat(YStepHandler, 5.0f/height);
     }
 }
