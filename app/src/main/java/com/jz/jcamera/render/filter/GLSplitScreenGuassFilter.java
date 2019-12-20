@@ -1,9 +1,10 @@
-package com.jz.jcamera.render;
+package com.jz.jcamera.render.filter;
 
 import android.content.Context;
 import android.opengl.GLES30;
 
 import com.jz.jcamera.R;
+import com.jz.jcamera.render.filter.BaseFilter;
 import com.jz.jcamera.util.OpenGLUtil;
 
 /**
@@ -14,7 +15,7 @@ import com.jz.jcamera.util.OpenGLUtil;
  * @describe 上中下三屏幕分屏
  * @email jackzhouyu@foxmail.com
  **/
-public class GLSplitScreenGuassFilter extends BaseFilter{
+public class GLSplitScreenGuassFilter extends BaseFilter {
 
     private int XLenHandler;
     private int YLenHandler;
@@ -44,7 +45,7 @@ public class GLSplitScreenGuassFilter extends BaseFilter{
     @Override
     public void onDisplaySizeChanged(int width, int height) {
         super.onDisplaySizeChanged(width, height);
-        setFloat(XStepHandler, 5.0f/width);
-        setFloat(YStepHandler, 5.0f/height);
+        setFloat(XStepHandler, 8.0f/width);
+        setFloat(YStepHandler, 8.0f/height);
     }
 }

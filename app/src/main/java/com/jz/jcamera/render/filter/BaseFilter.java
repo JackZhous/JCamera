@@ -1,4 +1,4 @@
-package com.jz.jcamera.render;
+package com.jz.jcamera.render.filter;
 
 import android.content.Context;
 import android.graphics.PointF;
@@ -22,7 +22,7 @@ import java.util.LinkedList;
 public class BaseFilter {
     public static final int CameraIndex = 0;        // 相机输入索引
 
-    protected static final String VERTEX_SHADER = "" +
+    public static final String VERTEX_SHADER = "" +
             "attribute vec4 aPosition;                                  \n" +
             "attribute vec4 aTextureCoord;                              \n" +
             "varying vec2 textureCoordinate;                            \n" +

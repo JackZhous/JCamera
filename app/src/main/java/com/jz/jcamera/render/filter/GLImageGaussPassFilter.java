@@ -1,9 +1,10 @@
-package com.jz.jcamera.render;
+package com.jz.jcamera.render.filter;
 
 import android.content.Context;
 import android.opengl.GLES20;
 
 import com.jz.jcamera.R;
+import com.jz.jcamera.render.filter.BaseFilter;
 import com.jz.jcamera.util.OpenGLUtil;
 
 /**

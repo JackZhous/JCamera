@@ -1,7 +1,6 @@
-package com.jz.jcamera.render;
+package com.jz.jcamera.render.filter;
 
 import android.content.Context;
-import android.opengl.GLES20;
 import android.opengl.GLES30;
 
 import com.jz.jcamera.R;
@@ -41,7 +40,6 @@ public class GLGaussFilter extends BaseFilter {
     public GLGaussFilter(Context context, String vertexShader, String fragmentShader) {
         super(context, vertexShader, fragmentShader);
         mGaussianBlurFilter = new GLImageGaussianBlurFilter(mContext);
-        mBlurTexture = OpenGLUtil.GL_NOT_TEXTURE;
     }
 
     @Override

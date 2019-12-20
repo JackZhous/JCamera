@@ -3,8 +3,14 @@ package com.jz.jcamera.render;
 import android.content.Context;
 import android.util.SparseArray;
 
-import com.jz.jcamera.camera.Camera2Manager;
-import com.jz.jcamera.camera.CameraParam;
+import com.jz.jcamera.R;
+import com.jz.jcamera.render.filter.BaseFilter;
+import com.jz.jcamera.render.filter.GLImageBorderFilter;
+import com.jz.jcamera.render.filter.GLImageOESInputFilter;
+import com.jz.jcamera.render.filter.GLMosaicFilter;
+import com.jz.jcamera.render.filter.GLMutilScreenFilter;
+import com.jz.jcamera.render.filter.GLSplitScreenGuassFilter;
+import com.jz.jcamera.render.filter.GLbeautifyFilter;
 import com.jz.jcamera.util.JLog;
 import com.jz.jcamera.util.OpenGLUtil;
 import com.jz.jcamera.util.ScaleType;
@@ -89,8 +95,8 @@ public class RenderManager {
     private void initFilters(){
         releaseFilters();
         filterArrays.put(BaseFilter.CameraIndex, new GLImageOESInputFilter(context));
-        filterArrays.put(1, new GLSplitScreenGuassFilter(context));
-//        filterArrays.put(2, new BaseFilter(context));
+        filterArrays.put(1, new GLbeautifyFilter(context));
+//        filterArrays.put(1, new BaseFilter(context));
     }
 
     private void releaseFilters(){

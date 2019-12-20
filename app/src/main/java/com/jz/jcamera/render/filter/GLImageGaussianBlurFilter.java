@@ -1,4 +1,4 @@
-package com.jz.jcamera.render;
+package com.jz.jcamera.render.filter;
 
 import android.content.Context;
 
@@ -14,7 +14,7 @@ import java.nio.FloatBuffer;
  * @describe TODO
  * @email jackzhouyu@foxmail.com
  **/
-public class GLImageGaussianBlurFilter  extends BaseFilter{
+public class GLImageGaussianBlurFilter  extends BaseFilter {
     protected GLImageGaussPassFilter mVerticalPassFilter;
     protected GLImageGaussPassFilter mHorizontalPassFilter;
 

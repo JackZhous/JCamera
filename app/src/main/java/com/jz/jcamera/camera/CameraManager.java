@@ -34,7 +34,7 @@ public class CameraManager implements CameraHelper{
 
     private Camera camera;
     //摄像头id
-    private int camerId = 0;
+    private int camerId = 1;
     // 视图宽高
     private int viewWidth;
     private int viewHeight;
@@ -76,7 +76,7 @@ public class CameraManager implements CameraHelper{
     public void openCamera(Context context, Handler handler){
         try {
             //Camera.CameraInfo.CAMERA_FACING_FRONT
-            camera = Camera.open();
+            camera = Camera.open(camerId);
         } catch (Exception e) {
             e.printStackTrace();
             JLog.i("open camera failed");

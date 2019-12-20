@@ -4,7 +4,7 @@
 #include <iostream>
 using namespace std;
 
-#define N 2
+#define N 1
 #define PI 3.141592653
 
 int main()

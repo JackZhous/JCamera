@@ -111,7 +111,7 @@ public class OpenGLUtil {
 //        return createTexture(GLES30.GL_TEXTURE_2D);
     }
 
-    private static int createTexture(int type){
+    public static int createTexture(int type){
         int[] textures = new int[1];
         GLES30.glGenTextures(1, textures, 0);
         checkGlError("glGenTextures");

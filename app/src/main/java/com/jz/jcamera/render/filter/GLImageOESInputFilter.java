@@ -1,10 +1,11 @@
-package com.jz.jcamera.render;
+package com.jz.jcamera.render.filter;
 
 import android.content.Context;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES30;
 
 import com.jz.jcamera.R;
+import com.jz.jcamera.render.filter.BaseFilter;
 import com.jz.jcamera.util.OpenGLUtil;
 
 /**
@@ -15,7 +16,7 @@ import com.jz.jcamera.util.OpenGLUtil;
  * @describe TODO
  * @email jackzhouyu@foxmail.com
  **/
-public class GLImageOESInputFilter extends BaseFilter{
+public class GLImageOESInputFilter extends BaseFilter {
 
     private int mTransformMatrixHandle;
     private float[] mTransformMatrix;

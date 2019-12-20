@@ -2,7 +2,7 @@
 attribute vec4 aPosition;
 attribute vec4 aTextureCoord;
 
-varying highp vec2 blurtexCoor[7];
+varying highp vec2 blurtexCoor[13];
 uniform float xStep;
 uniform float yStep;   //归一化后每个步长
 
@@ -16,6 +16,12 @@ void main(){
     blurtexCoor[4] = aTextureCoord.xy + vec2(0.0, yStep);
     blurtexCoor[5] = aTextureCoord.xy + vec2(xStep, yStep);
     blurtexCoor[6] = aTextureCoord.xy + vec2(-xStep, -yStep);
+    blurtexCoor[7] = aTextureCoord.xy + vec2(xStep*2.0, 0.0);
+    blurtexCoor[8] = aTextureCoord.xy + vec2(-xStep*2.0, 0.0);
+    blurtexCoor[9] = aTextureCoord.xy + vec2(0.0, yStep*2.0);
+    blurtexCoor[10] = aTextureCoord.xy + vec2(0.0, yStep*2.0);
+    blurtexCoor[11] = aTextureCoord.xy + vec2(xStep*2.0, yStep*2.0);
+    blurtexCoor[12] = aTextureCoord.xy + vec2(-xStep*2.0, -yStep*2.0);
 }
 
 
