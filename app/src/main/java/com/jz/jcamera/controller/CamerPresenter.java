@@ -2,11 +2,14 @@ package com.jz.jcamera.controller;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.TextView;
 
-import com.jz.jcamera.camera.CameraManager;
 import com.jz.jcamera.camera.CameraParam;
 import com.jz.jcamera.render.RenderHandler;
 import com.jz.jcamera.render.RenderThread;
+import com.jz.jcamera.util.JLog;
 
 /**
  * @author jackzhous
@@ -16,18 +19,23 @@ import com.jz.jcamera.render.RenderThread;
  * @describe TODO
  * @email jackzhouyu@foxmail.com
  **/
-public final class CamerPresenter {
+public final class CamerPresenter implements PCallBack {
 
     private CameraParam cameraParam;
 
     private RenderHandler renderHandler;
     private RenderThread renderThread;
+    private Handler mainHandler;
+    private VCallback mainV;
 
 
     private static class RenderHolder {
         private static CamerPresenter instance = new CamerPresenter();
     }
 
+    public void setMainV(VCallback mainV) {
+        this.mainV = mainV;
+    }
 
     private CamerPresenter() {
         cameraParam = CameraParam.getInstance();
@@ -41,9 +49,11 @@ public final class CamerPresenter {
 
     public void init(Context context){
         renderThread = new RenderThread("renderThread", context);
+        renderThread.setpCallBack(this);
         renderThread.start();
         renderHandler = new RenderHandler(renderThread);
         renderThread.setRenderHandler(renderHandler);
+        mainHandler = new Handler(Looper.getMainLooper());
     }
 
     public void bindSurface(SurfaceTexture surfaceTexture){
@@ -59,5 +69,24 @@ public final class CamerPresenter {
     public void unBindSurface() {
         renderHandler.sendMessage(renderHandler
                 .obtainMessage(RenderHandler.MSG_SURFACE_DESTROYED));
+    }
+
+    @Override
+    public void showFps(float fps) {
+        if(mainV == null){
+            return;
+        }
+        mainHandler.post(() -> {
+            if(mainV.getFpsView() != null){
+                JLog.i("show fps " + fps);
+                mainV.getFpsView().setText(String.valueOf(fps));
+            }
+        });
+    }
+
+
+    public void onRelease(){
+        mainV = null;
+        mainHandler = null;
     }
 }

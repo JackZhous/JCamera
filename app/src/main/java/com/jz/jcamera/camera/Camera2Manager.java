@@ -150,7 +150,6 @@ public class Camera2Manager implements CameraHelper{
                             @Override
                             public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
                                 super.onCaptureCompleted(session, request, result);
-                                JLog.i("onCaptureCompleted");
                                 handler.sendMessage(handler.obtainMessage(RenderHandler.MSG_DRAW_FRAME));
                             }
                         }, handler);

@@ -3,14 +3,17 @@ package com.jz.jcamera;
 import android.Manifest;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
+import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.TextView;
 
 import com.jz.jcamera.base.BaseActivity;
 import com.jz.jcamera.camera.Camera2Manager;
 import com.jz.jcamera.camera.CameraParam;
 import com.jz.jcamera.controller.CamerPresenter;
+import com.jz.jcamera.controller.VCallback;
 import com.jz.jcamera.util.JLog;
 import com.tbruyelle.rxpermissions2.Permission;
 import com.tbruyelle.rxpermissions2.RxPermissions;
@@ -18,12 +21,13 @@ import com.tbruyelle.rxpermissions2.RxPermissions;
 import io.reactivex.functions.Consumer;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener,
-                                                            TextureView.SurfaceTextureListener{
+                                                            TextureView.SurfaceTextureListener,
+                                                            VCallback {
 
 
     TextureView textureView;
+    TextView fps;
     private CamerPresenter presenter;
-
 
     @Override
     protected int provideLayout() {
@@ -33,19 +37,26 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void init() {
-
         presenter = CamerPresenter.getInstance();
         presenter.init(this);
+        presenter.setMainV(this);
         initView();
         initPermission();
     }
 
     private void initView(){
         textureView = $(R.id.texture_view);
+        fps = $(R.id.fps);
         $(R.id.ic_take).setOnClickListener(this);
         $(R.id.ic_tx).setOnClickListener(this);
         $(R.id.ic_lib).setOnClickListener(this);
         textureView.setSurfaceTextureListener(this);
+    }
+
+
+    @Override
+    public TextView getFpsView() {
+        return fps;
     }
 
     @Override
@@ -102,5 +113,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
 
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter.onRelease();
     }
 }

@@ -101,6 +101,10 @@ public class RenderHandler extends Handler {
             case MSG_CAMERA_OPENDED:
                 thread.setPreview();
                 break;
+
+            case MSG_CALCULATE_FPS:
+                thread.caluteFps();
+                break;
         }
     }
 }

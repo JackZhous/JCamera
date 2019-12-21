@@ -13,6 +13,8 @@ import com.jz.jcamera.camera.Camera2Manager;
 import com.jz.jcamera.camera.CameraHelper;
 import com.jz.jcamera.camera.CameraManager;
 import com.jz.jcamera.camera.CameraParam;
+import com.jz.jcamera.camera.FpsHelper;
+import com.jz.jcamera.controller.PCallBack;
 import com.jz.jcamera.opengl.EGLHelper;
 import com.jz.jcamera.util.JLog;
 import com.jz.jcamera.util.OpenGLUtil;
@@ -47,6 +49,8 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
     private CameraParam cameraParam = CameraParam.getInstance();
 
     private RenderHandler renderHandler;
+    private FpsHelper fpsHelper;
+    private PCallBack pCallBack;
 
     // 输入图像大小
     private int mTextureWidth, mTextureHeight;
@@ -60,6 +64,11 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
         }else {
             cameraHelper = new Camera2Manager(context);
         }
+        fpsHelper = new FpsHelper();
+    }
+
+    public void setpCallBack(PCallBack pCallBack) {
+        this.pCallBack = pCallBack;
     }
 
     public void setRenderHandler(RenderHandler renderHandler) {
@@ -80,8 +89,7 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
                 renderHandler.sendMessage(renderHandler.obtainMessage(RenderHandler.MSG_PREVIEW_CALLBACK, data));
             }
 
-            //计算fps
-//            if()
+
         }
     }
     /**
@@ -92,12 +100,14 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
         if (cameraParam.cameraCallback != null) {
             cameraParam.cameraCallback.onPreviewCallback(data);
         }
-        JLog.i("onPreviewCallback");
+
         drawFrame();
     }
 
 
     void drawFrame(){
+        //计算fps
+        caluteFps();
         if(mDisplaySurface == null || surfaceTexture == null){
             return;
         }
@@ -208,5 +218,16 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
     private void startPreview(){
         cameraHelper.startPreview(renderHandler);
         isPreviewing = true;
+    }
+
+
+    /**
+     * 计算fps
+     */
+    protected void caluteFps(){
+        fpsHelper.caluteFps();
+        if(pCallBack != null){
+            pCallBack.showFps(fpsHelper.getFps());
+        }
     }
 }
