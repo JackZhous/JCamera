@@ -9,7 +9,11 @@ import android.widget.TextView;
 import com.jz.jcamera.camera.CameraParam;
 import com.jz.jcamera.render.RenderHandler;
 import com.jz.jcamera.render.RenderThread;
+import com.jz.jcamera.util.FileUtil;
 import com.jz.jcamera.util.JLog;
+import com.jz.jcamera.util.ToastHelper;
+
+import java.nio.ByteBuffer;
 
 /**
  * @author jackzhous
@@ -27,6 +31,7 @@ public final class CamerPresenter implements PCallBack {
     private RenderThread renderThread;
     private Handler mainHandler;
     private VCallback mainV;
+    private Context context;
 
 
     private static class RenderHolder {
@@ -48,6 +53,7 @@ public final class CamerPresenter implements PCallBack {
     }
 
     public void init(Context context){
+        this.context = context;
         renderThread = new RenderThread("renderThread", context);
         renderThread.setpCallBack(this);
         renderThread.start();
@@ -88,5 +94,18 @@ public final class CamerPresenter implements PCallBack {
     public void onRelease(){
         mainV = null;
         mainHandler = null;
+    }
+
+    public void takePhoto(){
+        renderHandler.sendEmptyMessage(RenderHandler.MSG_TAKE_PICTURE);
+    }
+
+    @Override
+    public void takePhotoSuccess(ByteBuffer buffer, int width, int height) {
+        String path = FileUtil.getImagePath(context);
+        boolean flag = FileUtil.saveBitmap(path, buffer, width, height);
+        if(flag){
+            ToastHelper.showMsg(context, "图片保存在："+path);
+        }
     }
 }

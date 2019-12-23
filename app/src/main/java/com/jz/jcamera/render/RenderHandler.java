@@ -105,6 +105,10 @@ public class RenderHandler extends Handler {
             case MSG_CALCULATE_FPS:
                 thread.caluteFps();
                 break;
+
+            case MSG_TAKE_PICTURE:
+                thread.takePhoto();
+                break;
         }
     }
 }

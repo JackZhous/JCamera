@@ -19,6 +19,8 @@ import com.jz.jcamera.opengl.EGLHelper;
 import com.jz.jcamera.util.JLog;
 import com.jz.jcamera.util.OpenGLUtil;
 
+import java.nio.ByteBuffer;
+
 /**
  * @author jackzhous
  * @package com.jz.jcamera.render
@@ -51,6 +53,8 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
     private RenderHandler renderHandler;
     private FpsHelper fpsHelper;
     private PCallBack pCallBack;
+
+    private final Object lockCamera = new Object();
 
     // 输入图像大小
     private int mTextureWidth, mTextureHeight;
@@ -228,6 +232,15 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
         fpsHelper.caluteFps();
         if(pCallBack != null){
             pCallBack.showFps(fpsHelper.getFps());
+        }
+    }
+
+    protected void takePhoto(){
+        synchronized (lockCamera){
+            ByteBuffer buffer = mDisplaySurface.getCurrentFrame();
+            if(pCallBack != null){
+                pCallBack.takePhotoSuccess(buffer, mDisplaySurface.getmWidth(), mDisplaySurface.getmHeight());
+            }
         }
     }
 }

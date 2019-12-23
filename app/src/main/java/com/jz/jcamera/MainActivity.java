@@ -64,7 +64,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         switch (v.getId()){
             //拍照
             case R.id.ic_take:
-
+                presenter.takePhoto();
                 break;
 
             //特效
