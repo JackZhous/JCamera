@@ -2,6 +2,7 @@ package com.jz.jcamera.util;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.os.Environment;
 
 import java.io.BufferedOutputStream;
@@ -27,7 +28,7 @@ public class FileUtil {
             path = context.getCacheDir().getAbsolutePath();
             JLog.i("cache dir is " + path);
         }
-        path += File.separator + "JCamer_" + System.currentTimeMillis() + "jpeg";
+        path += File.separator + "JCamer_" + System.currentTimeMillis() + ".jpeg";
         File file = new File(path);
         if(!file.getParentFile().exists()){
             file.getParentFile().mkdir();
@@ -44,8 +45,14 @@ public class FileUtil {
             instream = new BufferedOutputStream(new FileOutputStream(path));
             Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             bitmap.copyPixelsFromBuffer(buffer);
+            bitmap = rorateDegree(bitmap, 180);
+            bitmap = xFlip(bitmap);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, instream);
             success = true;
+            if(bitmap.isRecycled()){
+                bitmap.recycle();
+                bitmap = null;
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             success = false;
@@ -59,6 +66,28 @@ public class FileUtil {
             }
         }
         return success;
+    }
+
+
+    public static Bitmap rorateDegree(Bitmap bitmap, int degree){
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degree);
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+        return bitmap;
+    }
+
+    /**
+     * 水平翻转
+     * @param bitmap
+     * @return
+     */
+    public static Bitmap xFlip(Bitmap bitmap){
+        Matrix matrix = new Matrix();
+        matrix.setScale(-1, 1);
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+        return bitmap;
     }
 
 }

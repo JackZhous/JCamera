@@ -90,5 +90,5 @@ void main(){
     //细节融合，显示的图像更真实 max是原图和平滑后图像比较，原图黑色皮肤部分smoothColor后变大，所以取smoothColor，而皮肤白色部分smoothColor较小，所以取原图
     //mix函数，如果美颜越高，则alpha越小，smoothColor.rgb * （1-a）权重更大，保留原色多一些，优化的图像max更小，加上就是补充细节
     gl_FragColor = vec4(mix(smoothColor.rgb, max(smoothColor, centralColor), alpha), 1.0);
-//    gl_FragColor = vec4(centralColor, 1.0);
+//    gl_FragColor = vec4(highPass, highPass, highPass, 1.0);
 }

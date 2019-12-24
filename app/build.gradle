@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
-
+//def platformVersion = 24      // openGLES 3.2 min api level
+def platformVersion = 21    // 18: openGLES 3 min api level
+// def platformVersion = 12    //openGLES 2 min api level
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -9,6 +11,16 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++11"
+                arguments "-DANDROID_PLATFORM_LEVEL=${platformVersion}",
+                        '-DANDROID_TOOLCHAIN=clang'
+            }
+            ndk {
+                abiFilters "armeabi-v7a"
+            }
+        }
     }
     buildTypes {
         release {
@@ -19,6 +31,11 @@ android {
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
+    }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
     }
 }
 

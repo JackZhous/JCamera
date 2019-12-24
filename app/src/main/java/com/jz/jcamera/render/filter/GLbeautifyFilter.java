@@ -75,7 +75,7 @@ public class GLbeautifyFilter extends BaseFilter {
         }
 
         if(paramsHandler != OpenGLUtil.GL_NOT_INIT){
-            setFloat(paramsHandler, 1f);
+            setFloat(paramsHandler, 0.5f);
         }
     }
 }

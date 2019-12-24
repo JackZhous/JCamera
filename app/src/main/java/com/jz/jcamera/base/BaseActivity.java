@@ -29,7 +29,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected void init(){}
 
-    public <T extends View> T $(@IdRes int id) {
+    public final <T extends View> T $(@IdRes int id) {
         return this.getDelegate().findViewById(id);
     }
 

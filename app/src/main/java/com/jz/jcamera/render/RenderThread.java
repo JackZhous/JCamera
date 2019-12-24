@@ -64,7 +64,7 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
         this.context = context;
         renderManager = RenderManager.getInstance();
         if(Build.VERSION.SDK_INT < 21){
-            cameraHelper = CameraManager.getInstance();
+            cameraHelper = new CameraManager();
         }else {
             cameraHelper = new Camera2Manager(context);
         }
@@ -161,7 +161,6 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
     }
 
     void surfaceCreate(SurfaceTexture surface){
-        JLog.i("surfaceCreate");
         eglHelper = new EGLHelper();
         mDisplaySurface = new WindowSurface(eglHelper, surface);
         mDisplaySurface.makeCurrent();
@@ -178,14 +177,12 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
 
 
     private void openCamera(){
-        JLog.i("open camera");
         releaseCamera();
         cameraHelper.initCamera(surfaceTexture);
         cameraHelper.openCamera(context, renderHandler);
     }
 
     void setPreview(){
-        JLog.i("set preview");
         cameraHelper.setPreviewCallback(surfaceTexture);
         if(cameraHelper instanceof  CameraManager){
             ((CameraManager) cameraHelper).setPreviewCallback(this);
@@ -214,7 +211,6 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
     }
 
     void surfaceChanged(int width, int height){
-        JLog.i("surfaceChanged");
         renderManager.setDisplaySize(width, height);
         startPreview();
     }
@@ -238,6 +234,7 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
     protected void takePhoto(){
         synchronized (lockCamera){
             ByteBuffer buffer = mDisplaySurface.getCurrentFrame();
+
             if(pCallBack != null){
                 pCallBack.takePhotoSuccess(buffer, mDisplaySurface.getmWidth(), mDisplaySurface.getmHeight());
             }

@@ -42,7 +42,7 @@ public class CameraManager implements CameraHelper{
     private int mTextureWidth, mTextureHeight;
     private Handler handler;
 
-    private CameraManager() {
+    public CameraManager() {
     }
 
     @Override
@@ -50,14 +50,7 @@ public class CameraManager implements CameraHelper{
         this.handler = handler;
     }
 
-    public static CameraManager getInstance(){
-        return Holder.instance;
-    }
 
-    private static class Holder{
-
-        private static CameraManager instance = new CameraManager();
-    }
 
     @Override
     public void initCamera(SurfaceTexture texture) {
