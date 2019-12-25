@@ -4,7 +4,6 @@
 #include <jni.h>
 #include <cstddef>
 #include <AndroidLog.h>
-#include <JNIHelp.h>
 #include <Recorder.h>
 
 //因为ffmpeg使用c写的，所以需要使用C方式来编译
@@ -15,7 +14,7 @@ extern "C" {
 
 static JavaVM* javaVM = NULL;
 
-const char* JAVA_CLASS = "com/jz/myplayer/player/NativeHelper";
+const char* JAVA_CLASS = "com/jz/jcamera/recorder/FFmpegRecorder";
 
 
 jlong nativeInit(){

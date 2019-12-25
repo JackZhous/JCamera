@@ -32,7 +32,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
     private void initPermission(){
         RxPermissions permissions = new RxPermissions(this);
-        permissions.request(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        permissions.request(Manifest.permission.CAMERA,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.RECORD_AUDIO)
                 .subscribe(granted ->{
                     if(!granted){
                         showMessage("获取权限失败!");

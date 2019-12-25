@@ -84,8 +84,9 @@ public final class CamerPresenter implements PCallBack {
         }
         mainHandler.post(() -> {
             if(mainV.getFpsView() != null){
-                JLog.i("show fps " + fps);
-                mainV.getFpsView().setText(String.valueOf(fps));
+                if(mainV.getFpsView() != null){
+                    mainV.getFpsView().setText(String.valueOf(fps));
+                }
             }
         });
     }

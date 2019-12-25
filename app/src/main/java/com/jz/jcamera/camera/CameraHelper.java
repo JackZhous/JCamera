@@ -14,10 +14,12 @@ public interface CameraHelper {
 
     void setPreviewCallback(SurfaceTexture texture);
 
+
     void startPreview(Handler handler);
 
     void stopPreview();
 
     void releaseCamera();
+
     void setHandler(Handler handler);
 }

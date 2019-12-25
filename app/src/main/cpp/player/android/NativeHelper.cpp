@@ -158,7 +158,7 @@ static void setVideoSurface(JNIEnv* env, jobject thiz, jobject surface){
 
 static const JNINativeMethod nativeToJavaMethod[] = {
         {"native_init", "()V", (void *)playerInit},
-        {"nativeSetConnect", "(Lcom/jz/myplayer/player/JMediaPlayer;Ljava/lang/Object;)V", (void *)nativeSetUp},
+//        {"nativeSetConnect", "(Lcom/jz/myplayer/player/JMediaPlayer;Ljava/lang/Object;)V", (void *)nativeSetUp},
         {"setUrl", "(Ljava/lang/String;)V", (void*)setVideoUrl},
         {"setVideoPath", "(Ljava/lang/String;)V", (void*)setVideoPath},
         {"preparePlayerAsyn", "()V", (void*)preparePlayer},
