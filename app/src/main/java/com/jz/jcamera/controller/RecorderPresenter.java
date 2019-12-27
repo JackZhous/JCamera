@@ -92,10 +92,12 @@ public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListene
         return null;
     }
 
+
+
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         if(isRecording){
-
+            JLog.i("视频data"+data.length);
         }
     }
 
@@ -107,7 +109,7 @@ public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListene
     @Override
     public void recorderProgress(byte[] data) {
         if(isRecording){
-
+            JLog.i("音频data"+data.length);
         }
     }
 

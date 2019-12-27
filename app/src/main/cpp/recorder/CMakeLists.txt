@@ -1,13 +1,7 @@
-# 根据API版本判断使用哪个版本的OpenGLES
-if (${ANDROID_PLATFORM_LEVEL} LESS 12)
-    message(FATAL_ERROR "OpenGL 2 is not supported before API level 11 (currently using ${ANDROID_PLATFORM_LEVEL}).")
-    return()
-elseif (${ANDROID_PLATFORM_LEVEL} LESS 18)
-    add_definitions("-DDYNAMIC_ES3")
-    set(GLES-lib GLESv2)
-else ()
-    set(GLES-lib GLESv3)
-endif (${ANDROID_PLATFORM_LEVEL} LESS 11)
+set(common_dir ../common)
+
+# 添加头文件路径
+include_directories(${common_dir} )
 
 #添加头文件
 include_directories(android
@@ -17,8 +11,17 @@ include_directories(android
 add_library(recorder
             SHARED
 
+            # 通用类
+            ${common_dir}/AVFrameFilter.cpp
+            ${common_dir}/AVMediaWriter.cpp
+            #${common_dir}/AVFormatter.cpp
+            ${common_dir}/AVMediaData.cpp
+            ${common_dir}/YUVConvertor.cpp
+            #${common_dir}/YuvData.cpp
+
             android/RecorderNative.cpp
             src/Recorder.cpp
+            src/RecordParams.cpp
         )
 
 

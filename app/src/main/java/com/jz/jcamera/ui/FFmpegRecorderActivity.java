@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.opengl.GLSurfaceView;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.jz.jcamera.R;
 import com.jz.jcamera.base.BaseActivity;
@@ -27,6 +28,8 @@ public class FFmpegRecorderActivity extends BaseActivity implements View.OnClick
     RecorderRender render;
     GLSurfaceView glSurface;
     private AudioManager audioManager;
+    private boolean isRecording;
+    private ImageView imageButton;
 
     @Override
     protected int provideLayout() {
@@ -42,7 +45,8 @@ public class FFmpegRecorderActivity extends BaseActivity implements View.OnClick
         glSurface.setEGLContextClientVersion(3);
         glSurface.setRenderer(render);
         glSurface.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-        findViewById(R.id.record).setOnClickListener(this);
+        imageButton = findViewById(R.id.record);
+        imageButton.setOnClickListener(this);
         if (audioManager == null) {
             audioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
             audioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
@@ -55,7 +59,14 @@ public class FFmpegRecorderActivity extends BaseActivity implements View.OnClick
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.record:
-
+                if(isRecording){
+                    imageButton.setImageResource(R.drawable.ic_take);
+                    presenter.stopRecord();
+                }else {
+                    imageButton.setImageResource(R.drawable.ic_stop);
+                    presenter.startRecord();
+                }
+                isRecording = !isRecording;
                 break;
         }
     }
@@ -79,6 +90,7 @@ public class FFmpegRecorderActivity extends BaseActivity implements View.OnClick
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        presenter.stopRecord();
         presenter.onDestroy();
     }
 }
