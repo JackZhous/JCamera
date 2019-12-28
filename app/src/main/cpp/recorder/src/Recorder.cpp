@@ -70,3 +70,15 @@ void Recorder::setMRecordListener(OnRecordLisenter *listener) {
 RecordParams *Recorder::getMRecordParam() const {
     return mRecordParam;
 }
+
+
+int Recorder::prepare(){
+    if(mMediaWriter == nullptr){
+        LOGI("recorder prepare failed");
+        return -1;
+    }
+
+    RecordParams *param = mRecordParam;
+
+
+}
