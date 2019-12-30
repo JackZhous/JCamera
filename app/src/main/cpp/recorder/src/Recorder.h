@@ -13,6 +13,8 @@
 #include <YUVConvertor.h>
 #include <AVFrameFilter.h>
 #include <AVMediaWriter.h>
+#include <AndroidLog.h>
+#include <AVFormatter.h>
 
 extern "C"{
     #include <libavformat/avformat.h>

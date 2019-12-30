@@ -14,8 +14,7 @@ endif(CMAKE_COMPILER_IS_CLANG)
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
 
 # 添加头文件
-include_directories(common
-                    include)
+include_directories(include)
 add_library( # Sets the name of the library.
         ffmpeg
 
@@ -28,6 +27,19 @@ add_library( # Sets the name of the library.
 set_target_properties(ffmpeg
         PROPERTIES IMPORTED_LOCATION
         ${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/libffmpeg.so)
+
+add_library( # Sets the name of the library.
+        yuv
+
+        # Sets the library as a shared library.
+        SHARED
+
+        # Provides a relative path to your source file(s).
+        IMPORTED)
+
+set_target_properties(yuv
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/libyuv.so)
 
 
 #添加播放器源代码,因为这里有一也有一个cmake

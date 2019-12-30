@@ -14,10 +14,10 @@ add_library(recorder
             # 通用类
             ${common_dir}/AVFrameFilter.cpp
             ${common_dir}/AVMediaWriter.cpp
-            #${common_dir}/AVFormatter.cpp
+            ${common_dir}/AVFormatter.cpp
             ${common_dir}/AVMediaData.cpp
             ${common_dir}/YUVConvertor.cpp
-            #${common_dir}/YuvData.cpp
+            ${common_dir}/YUVData.cpp
 
             android/RecorderNative.cpp
             src/Recorder.cpp
@@ -29,7 +29,7 @@ add_library(recorder
 
 #库与库之间的共享
 target_link_libraries(recorder
-        player
+        yuv
         ffmpeg
 
         -landroid

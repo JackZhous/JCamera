@@ -6,6 +6,12 @@
 #define JCAMERA_RECORDPARAMS_H
 
 
+#include <cstdint>
+
+extern "C"{
+    #include <libavutil/mem.h>
+};
+
 class RecordParams {
 public:
     const char* dstFile;            //输出路径
@@ -70,6 +76,7 @@ public:
         void setVideoFilter(const char* filter);
 
         void setAudioFilter(const char* filter);
+
 
 };
 
