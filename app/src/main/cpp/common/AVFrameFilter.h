@@ -12,7 +12,7 @@ extern "C"{
 #include <libavutil/pixfmt.h>
 #include <libavfilter/avfilter.h>
 #include <libavformat/avformat.h>
-
+#include <libavutil/opt.h>
 };
 
 class AVFrameFilter {
@@ -26,11 +26,15 @@ public:
     void setVideoInput(int width, int height, AVPixelFormat pixelFormat, int frameRate,
                                 const char* filter);
 
-
     void setVideoOutput(AVPixelFormat format);
 
     void setAudioInput(int sampleRate, int channels, AVSampleFormat format, const char* filter);
 
+    int initFilter();
+
+    int initVIdeoFilter();
+
+    int initAudioFilter();
 
 private:
     int mWidth;

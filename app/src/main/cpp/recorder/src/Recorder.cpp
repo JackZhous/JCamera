@@ -120,7 +120,28 @@ int Recorder::prepare(){
 
     //filter
     if((param->videoFilter && strcmp(param->videoFilter, "null") != 0)
-            || (param->audioFilter && strcmp(param->audioFilter, "null") != 0)){
+            || (param->audioFilter && strcmp(param->audioFilter, "anull") != 0)){
         mFrameFilter = new AVFrameFilter();
+        mFrameFilter->setVideoInput(outputWidth, outputHeight, videoFormat, param->frameRate, param->videoFilter);
+        mFrameFilter->setVideoOutput(AV_PIX_FMT_YUV420P);
+        mFrameFilter->setAudioInput(param->sampleRate, param->channels, audioFormat, param->audioFilter);
+        if((ret = mFrameFilter->initFilter()) < 0){
+            delete mFrameFilter;
+            mFrameFilter = nullptr;
+        } else{
+            videoFormat = AV_PIX_FMT_YUV420P;
+        }
     }
+
+    mMediaWriter = new AVMediaWriter();
+    mMediaWriter->setMUseTimeStamp(true);
+    mMediaWriter->addEncodeOptions("preset", "uktrafast");
+    mMediaWriter->setQuality(param->quality > 0 ? param->quality : 23);
+    mMediaWriter->setMMaxBitRate(param->maxRate);
+    mMediaWriter->setOutoutPath(param->dstFile);
+    mMediaWriter->setOutputVideo(outputWidth, outputHeight, param->frameRate, videoFormat);
+    mMediaWriter->setOutputAudio(param->sampleRate, param->channels, audioFormat);
+
+    //准备
+
 }
