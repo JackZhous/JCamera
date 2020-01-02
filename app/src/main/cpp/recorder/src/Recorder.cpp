@@ -143,5 +143,99 @@ int Recorder::prepare(){
     mMediaWriter->setOutputAudio(param->sampleRate, param->channels, audioFormat);
 
     //准备
+    ret = mMediaWriter->prepare();
+    if(ret < 0){
+        release();
+    }
+    return 0;
+}
 
+void Recorder::startRecord() {
+    mMutex.lock();
+    mAbortRequest = false;
+    mStartRequest = true;
+    mCond.signal();
+    mMutex.unlock();
+
+    if(mRecordThread == nullptr){
+        mRecordThread = new Thread(this);
+        mRecordThread->start();
+        //子线程与主线程分离，子线程已结束，立即回收其资源
+        mRecordThread->detach();
+    }
+}
+
+void Recorder::stopRecord() {
+    mMutex.lock();
+    mAbortRequest = true;
+    mCond.signal();
+    mMutex.unlock();
+    if(mRecordThread != nullptr){
+        mRecordThread->join();
+        delete mRecordThread;
+        mRecordThread = nullptr;
+    }
+}
+
+bool Recorder::isRecording() {
+    bool recording = false;
+    mMutex.lock();
+    recording = !mAbortRequest && mStartRequest && !mExit;
+    mMutex.unlock();
+    return recording;
+}
+
+/**
+ * 录制一帧数据
+ */
+int Recorder::recordFrame(AVMediaData *data) {
+    if(mAbortRequest || mExit){
+        LOGE("recorder is not recording");
+        delete data;
+        return -1;
+    }
+
+    //不允许音频录制 却有音频帧
+    if(!mRecordParam->enableAudio && data->getType() == MediaAudio){
+        delete data;
+        return -1;
+    }
+
+    if(!mRecordParam->enableVideo && data->getType() == MediaVideo){
+        delete data;
+        return -1;
+    }
+
+    if(mFrameQueue != nullptr){
+        mFrameQueue->push(data);
+    } else{
+        delete data;
+        LOGE("frame queue is null");
+        return -1;
+    }
+
+    return 0;
+}
+
+RecordParams* Recorder::getRecordParams() {
+    return mRecordParam;
+}
+
+void Recorder::run() {
+    int ret = 0;
+    int64_t start = 0;
+    int64_t current = 0;
+    mExit = false;
+
+    if(mRecordListener != nullptr){
+        mRecordListener->onRecordStart();
+    }
+    LOGI("waiting to start record");
+    while (!mStartRequest){
+        if(mAbortRequest){
+            break;
+        } else{
+            av_usleep(10000);
+        }
+    }
 }

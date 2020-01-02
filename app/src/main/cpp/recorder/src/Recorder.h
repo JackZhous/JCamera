@@ -19,6 +19,8 @@
 extern "C"{
     #include <libavformat/avformat.h>
     #include <libavfilter/avfilter.h>
+    #include <libavutil/time.h>
+
 };
 
 class OnRecordLisenter {
@@ -63,7 +65,7 @@ class Recorder : public Runnable{
 
         RecordParams *getRecordParams();
 
-    RecordParams *getMRecordParam() const;
+        RecordParams *getMRecordParam() const;
 
 private:
     Mutex mMutex;

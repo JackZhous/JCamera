@@ -2,8 +2,7 @@
 // Created by jackzhous on 2019/12/27.
 //
 
-#include <sstream>
-#include <AndroidLog.h>
+
 #include "AVMediaWriter.h"
 
 AVMediaWriter::~AVMediaWriter() {
@@ -94,12 +93,222 @@ int AVMediaWriter::openOutputFile() {
         LOGE("failed to Open video encoder context: %s", av_err2str(ret));
         return ret;
     }
+    if(mHasAudio && (ret = openEncoder(AVMEDIA_TYPE_AUDIO) < 0)){
+        LOGE("failed to Open audio encoder context: %s", av_err2str(ret));
+        return ret;
+    }
 
+    //如果存在视频流，创建视频缓冲帧对象
+    if(mHasVideo){
+        mImageFrame = av_frame_alloc();
+        if(!mImageFrame){
+            LOGE("failed to allocate video frame");
+            return -1;
+        }
+        mImageFrame->format = mPixelFormat;
+        mImageFrame->width = mWidth;
+        mImageFrame->height = mHeight;
+        mImageFrame->pts = 0;
+
+        int size = av_image_get_buffer_size(mPixelFormat, mWidth, mHeight, 1);
+        if(size < 0){
+            LOGE("failed to get image buffer size: %s", av_err2str(size));
+            return -1;
+        }
+
+        mImageBuffer = (uint8_t *)av_malloc((size_t)size);
+        if(!mImageBuffer){
+            LOGE("failed to allocate image buffer");
+            return -1;
+        }
+    }
+
+    if(mHasAudio){
+        mSampleFrame = av_frame_alloc();
+        if(!mSampleFrame){
+            LOGE("failed to allocate audio frame");
+            return -1;
+        }
+        mSampleFrame->format = pAudioCodecCtx->sample_fmt;
+        mSampleFrame->nb_samples = pAudioCodecCtx->frame_size;
+        mSampleFrame->channel_layout = pAudioCodecCtx->channel_layout;
+        mSampleFrame->pts = 0;
+
+        //是否为多声道
+        mSamplePlanes = av_sample_fmt_is_planar(pAudioCodecCtx->sample_fmt) ? pAudioCodecCtx->channels : 1;
+        //缓冲区大小
+        mSampleSize = av_samples_get_buffer_size(nullptr, pAudioCodecCtx->channels, pAudioCodecCtx->frame_size,
+                                                pAudioCodecCtx->sample_fmt, 1) / mSamplePlanes;
+        //初始采样缓冲区大小
+        mSampleBuffer = new uint8_t*[mSamplePlanes];
+        for(int i =0 ; i < mSamplePlanes; i++){
+            mSampleBuffer[i] = (uint8_t*)av_malloc((size_t)mSampleSize);
+            if(mSampleBuffer[i] == nullptr){
+                LOGE("failed to allocate sample buffer");
+                return -1;
+            }
+        }
+
+        //创建音频重采样上下文
+        pSampleConvertCtx = swr_alloc_set_opts(pSampleConvertCtx,
+                pAudioCodecCtx->channel_layout,
+                pAudioCodecCtx->sample_fmt,
+                pAudioCodecCtx->sample_rate,
+                av_get_default_channel_layout(mChannels),
+                mSampleFormat, mSampleRate, 0, nullptr);
+
+        if(!pSampleConvertCtx){
+            LOGE("failed to allocate SwrContext");
+        } else if(swr_init(pSampleConvertCtx) < 0){
+            LOGE("failed to init swr");
+        }
+    }
+
+    //打印信息
+    av_dump_format(pFormatCtx, 0, mDstUrl, 1);
+
+    if(!(pFormatCtx->oformat->flags & AVFMT_NOFILE)){
+        if((ret - avio_open(&pFormatCtx->pb, mDstUrl, AVIO_FLAG_WRITE)) < 0){
+            LOGE("failed to open output %s", mDstUrl);
+            return ret;
+        }
+    }
+
+    //写入文件头部信息
+    ret = avformat_write_header(pFormatCtx, nullptr);
+    if(ret < 0){
+        LOGE("failed to call avformat_write_header %s", av_err2str(ret));
+        return ret;
+    }
     return ret;
 }
 
 int AVMediaWriter::openEncoder(AVMediaType type) {
+    if(type != AVMEDIA_TYPE_VIDEO && type != AVMEDIA_TYPE_AUDIO){
+        LOGE("open encoder type failed!");
+        return -1;
+    }
 
+    int ret;
+    AVCodecContext *codecCtx = nullptr;
+    AVStream *stream = nullptr;
+    AVCodec *encoder = nullptr;
+    const char *encodeName = nullptr;
+
+    //根据指定的编码器名称查找编码器
+    if(type == AVMEDIA_TYPE_AUDIO){
+        encodeName = mAudioEncodeName;
+    } else if(type == AVMEDIA_TYPE_VIDEO){
+        encodeName = mVideoEncodeName;
+    }
+
+    if(encodeName != nullptr){
+        encoder = avcodec_find_encoder_by_name(encodeName);
+    }
+
+    if(encoder == nullptr){
+        if(encodeName != nullptr){
+            LOGE("failed to find encode by name : %s", encodeName);
+        }
+
+        if(type == AVMEDIA_TYPE_VIDEO){
+            encoder = avcodec_find_encoder(mVideoCodecId);
+        } else if(type == AVMEDIA_TYPE_AUDIO){
+            encoder = avcodec_find_encoder(mAudioCodecId);
+        }
+    }
+
+    if(encoder == nullptr){
+        LOGE("failed to find encoder");
+        return AVERROR_INVALIDDATA;
+    }
+
+    //创建编码器上下文
+    codecCtx = avcodec_alloc_context3(encoder);
+    if(codecCtx == nullptr){
+        LOGE("faild to allocted the encodr context");
+        return AVERROR(ENOMEM);
+    }
+
+    //创建媒体流
+    stream = avformat_new_stream(pFormatCtx, encoder);
+    if(stream == nullptr){
+        LOGE("failed allocted stream");
+        return  -1;
+    }
+
+    //处理参数
+    if (type == AVMEDIA_TYPE_VIDEO){
+        codecCtx->width = mWidth;
+        codecCtx->height = mHeight;
+        codecCtx->pix_fmt = mPixelFormat;
+        //got_size 即单位时间内画面的张数，也就是帧率，关键帧最大间隔数
+        codecCtx->gop_size = mFrameRate;
+
+        //设置是否时间时间戳作为pts，两种timebase不一样
+        if(mUseTimeStamp){
+            codecCtx->time_base = (AVRational){1, 1000};
+        } else{
+            codecCtx->time_base = (AVRational){1, mFrameRate};
+        }
+
+        //设置最大比特率
+        if(mMaxBitRate > 0){
+            codecCtx->rc_max_rate = mMaxBitRate;
+            codecCtx->rc_buffer_size = (int)mMaxBitRate;
+        }
+
+        auto it = mVideoMetadata.begin();
+        for(; it != mVideoMetadata.end(); it++){
+            av_dict_set(&stream->metadata, (*it).first.c_str(), (*it).second.c_str(), 0);
+        }
+    }else{
+        codecCtx->sample_rate = mSampleRate;
+        codecCtx->channels = mChannels;
+        codecCtx->channel_layout = (uint64_t)av_get_default_channel_layout(mChannels);
+        codecCtx->sample_fmt = encoder->sample_fmts[0];
+        codecCtx->time_base = AVRational{1, codecCtx->sample_rate};
+    }
+
+    stream->time_base = codecCtx->time_base;
+    //设置编码器全局信息 将一些附加信息SPS/PPS数据放在extradata里面  而不是放在每帧头里
+    if(pFormatCtx->oformat->flags & AVFMT_GLOBALHEADER){
+        codecCtx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+    }
+
+    //获取自定义编码参数
+    AVDictionary *option = nullptr;
+    auto it = mEncodeOptions.begin();
+    for(; it != mEncodeOptions.end(); it++){
+        av_dict_set(&option, (*it).first.c_str(), (*it).second.c_str(), 0);
+    }
+
+    //打开编码器
+    ret = avcodec_open2(codecCtx, encoder, &option);
+    if(ret < 0){
+        LOGE("could not open %s codec: %s", type == AVMEDIA_TYPE_VIDEO ? "video" : "audio", av_err2str(ret));
+        av_dict_free(&option);
+        return ret;
+    }
+    av_dict_free(&option);
+
+    //将编码器参数复制到媒体流中
+    ret = avcodec_parameters_from_context(stream->codecpar, codecCtx);
+    if(ret < 0){
+        LOGE("failed to copy encoder paramters to video stream");
+        return ret;
+    }
+
+    //编订编码器和媒体流
+    if(type == AVMEDIA_TYPE_VIDEO){
+        pVideoCodecCtx = codecCtx;
+        pVideoStream = stream;
+    } else{
+        pAudioStream = stream;
+        pAudioCodecCtx = codecCtx;
+    }
+
+    return ret;
 }
 
 
