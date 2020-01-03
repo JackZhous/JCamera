@@ -7,7 +7,9 @@
 
 #include "YUVData.h"
 #include "AVFormatter.h
-
+#include "AVMediaData.h"
+#include <libyuv/convert.h>
+#include <libyuv/scale.h>
 
 class YUVConvertor {
 public:
@@ -35,6 +37,14 @@ public:
 
     int getOutputHeight();
 
+    int convert(AVMediaData* mediaData));
+
+private:
+    int scale(YUVData *src, int srcW, int srcH);
+
+    int mirror(YUVData *src, int srcW, int srcH);
+
+    void fillMediaData(AVMediaData *model, YUVData *src, int srcW, int srcH);
 
 private:
     int mWidth;

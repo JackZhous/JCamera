@@ -6,6 +6,7 @@
 #define JCAMERA_AVFORMATTER_H
 
 #include <libyuv/rotate.h>
+#include <libyuv/video_common.h>
 extern "C"{
     #include <libavutil/samplefmt.h>
 };
@@ -89,6 +90,33 @@ inline libyuv::RotationMode getRotationMode(int degree){
         default:
             return libyuv::kRotate0;
     }
+}
+
+inline libyuv::FourCC getFourCC(PixelFormat format){
+    switch (format){
+        case PIXEL_FORMAT_NV12:
+            return libyuv::FOURCC_NV12;
+
+        case PIXEL_FORMAT_NV21:
+            return libyuv::FOURCC_NV21;
+
+        case PIXEL_FORMAT_YV12:
+            return libyuv::FOURCC_YV12;
+
+        case PIXEL_FORMAT_YUV420P:
+            return libyuv::FOURCC_I420;
+
+        case PIXEL_FORMAT_ABGR:
+            return libyuv::FOURCC_ABGR;
+
+        case PIXEL_FORMAT_ARGB:
+            return libyuv::FOURCC_ARGB;
+
+        case PIXEL_FORMAT_RGBA:
+            return libyuv::FOURCC_RGBA;
+    }
+
+    return libyuv::FOURCC_ANY;
 }
 
 

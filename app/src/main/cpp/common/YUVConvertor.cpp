@@ -2,6 +2,8 @@
 // Created by jackzhous on 2019/12/27.
 //
 
+#include <AndroidLog.h>
+#include <opencl-c.h>
 #include "YUVConvertor.h"
 
 
@@ -73,6 +75,130 @@ void YUVConvertor::setScale(int width, int height) {
 
 void YUVConvertor::setMirror(bool mirror) {
     mMirror = mirror;
+}
+
+
+int YUVConvertor::convert(AVMediaData *mediaData) {
+    if(!mNeedConvert){
+        LOGE("unable to convert media data");
+        return -1;
+    }
+
+    if(mediaData->getType() != MediaVideo){
+        LOGE("failed to convert media data: %s", mediaData->getName());
+        return -1;
+    }
+
+    if(mCropX + mCropWidth > mediaData->width || mCropY + mCropHeight > mediaData->height){
+        LOGE("crop argument invalid. media data: [%d ,%d], crop: [%d, %d ,%d ,%d]",
+             mediaData->width, mediaData->height,
+             mCropX, mCropY, mCropWidth, mCropHeight);
+        return -1;
+    }
+
+    int ret = 0;
+    ret = ConvertToI420(mediaData->image, (size_t) mediaData->length,
+            pCropData->dataY, pCropData->lineSizeY,
+            pCropData->dataU, pCropData->lineSizeU,
+            pCropData->dataV, pCropData->lineSizeV,
+            mCropX, mCropY, mediaData->width, mediaData->height, mCropWidth, mCropHeight,
+            mRotationMode, getFourCC((PixelFormat)mediaData->pixelFormat));
+    if(ret < 0){
+        LOGE("failed to call convertT420: %d", ret);
+        return ret;
+    }
+    YUVData *src = pCropData;
+    YUVData *output = pCropData;
+    int outputWidth = (mRotationMode == libyuv::kRotate0 || mRotationMode == libyuv::kRotate180) ? mCropWidth : mCropHeight;
+    int outputHeight = (mRotationMode == libyuv::kRotate0 || mRotationMode == libyuv::kRotate180) ? mCropHeight : mCropWidth;
+
+    if(mScaleWidth > 0 && mScaleHeight > 0){
+        if(scale(src, outputWidth, outputHeight) < 0){
+            return -1;
+        }
+        src = pScaleData;
+        output = pScaleData;
+        outputWidth = mScaleWidth;
+        outputHeight = mScaleHeight;
+    }
+
+    if(mMirror){
+        if(mirror(src, outputWidth, outputHeight) < 0){
+            return -1;
+        }
+        output = pMirrorata;
+    }
+
+    fillMediaData(mediaData, output, outputWidth, outputHeight);
+}
+
+
+/**
+ * 填充媒体数据
+ * @param model
+ * @param src
+ * @param srcW
+ * @param srcH
+ */
+void YUVConvertor::fillMediaData(AVMediaData *model, YUVData *src, int srcW, int srcH) {
+    uint8_t *image = new uint8_t[srcW * srcH *3 / 2];
+    if(model != nullptr){
+        model->free();
+    } else{
+        model = new AVMediaData();
+    }
+    model->image = image;
+    memcpy(model->image, src->dataY, (size_t)srcW * srcH);
+    memcpy(model->image+ srcW* srcH, src->dataU, (size_t)srcW * srcH / 4);
+    memcpy(model->image+ srcW* srcH * 5 /4, src->dataV, (size_t)srcW * srcH / 4);
+    model->length = srcW * srcH * 3 / 2;
+    model->width = srcW;
+    model->height = srcH;
+    model->pixelFormat = PIXEL_FORMAT_YUV420P;
+}
+
+
+
+int YUVConvertor::mirror(YUVData *src, int srcW, int srcH) {
+    int ret;
+    ret = libyuv::I420Mirror(src->dataY, src->lineSizeY,
+                             src->dataU, src->lineSizeU,
+                             src->dataV, src->lineSizeV,
+                             pMirrorata->dataY, pMirrorata->lineSizeY,
+                             pMirrorata->dataU, pMirrorata->lineSizeU,
+                             pMirrorata->dataV, pMirrorata->lineSizeV,
+                             srcW, srcH);
+    if (ret < 0) {
+        LOGE("Failed to call I420Mirror: %d", ret);
+        return ret;
+    }
+    return 0;
+}
+
+/**
+ * 缩放处理
+ * @param src
+ * @param srcW
+ * @param srcH
+ * @return
+ */
+int YUVConvertor::scale(YUVData *src, int srcW, int srcH) {
+    int ret;
+    ret = libyuv::I420Scale(src->dataY, src->lineSizeY,
+                            src->dataU, src->lineSizeU,
+                            src->dataV, src->lineSizeV,
+                            srcW, srcH,
+                            pScaleData->dataY, pScaleData->lineSizeY,
+                            pScaleData->dataU, pScaleData->lineSizeU,
+                            pScaleData->dataV, pScaleData->lineSizeV,
+                            mScaleWidth, mScaleHeight,
+                            libyuv::kFilterBox);
+    if (ret < 0) {
+        LOGE("Failed to call I420Scale: %d", ret);
+        return ret;
+    }
+
+    return 0;
 }
 
 /**

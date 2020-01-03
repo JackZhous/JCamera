@@ -5,7 +5,7 @@
 #include "YUVData.h"
 
 YUVData::YUVData() : dataY(nullptr), dataU(nullptr), dataV(nullptr),
-                    lineSizeV(0), lineSizeU(0), lineSizeV(0),
+                    lineSizeY(0), lineSizeU(0), lineSizeV(0),
                     width(0), height(0){}
 
 YUVData::YUVData(int width, int height) : width(width), height(height),

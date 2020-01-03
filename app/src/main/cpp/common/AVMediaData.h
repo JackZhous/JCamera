@@ -48,7 +48,7 @@ public:
 
     void free();
 
-private:
+public:
     uint8_t  *image;
     int length;
 

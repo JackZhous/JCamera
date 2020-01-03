@@ -234,8 +234,37 @@ void Recorder::run() {
     while (!mStartRequest){
         if(mAbortRequest){
             break;
-        } else{
-            av_usleep(10000);
+        }
+        av_usleep(10000);
+    }
+
+    //开始录制解码流程
+    if(!mAbortRequest && mStartRequest){
+        LOGI("start record");
+    }
+    while (!mAbortRequest || !mFrameQueue->empty()){
+        if(!mFrameQueue->empty()){
+            auto data = mFrameQueue->pop();
+            if(!data){
+                continue;
+            }
+            if(start == 0){
+                start = data->getPts();
+            }
+            if(data->getPts() >= current){
+                current = data->getPts();
+            }
+
+            //yuv转码
+            if(data->getType() == MediaVideo && mYuvConvert != nullptr){
+                if(mYuvConvert->convert(data) < 0){
+                    LOGE("failed to convert video data to yuv420p");
+                    delete  data;
+                    continue;
+                }
+            }
         }
     }
+
+
 }

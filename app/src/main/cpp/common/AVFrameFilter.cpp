@@ -66,7 +66,7 @@ void AVFrameFilter::setVideoInput(int width, int height, AVPixelFormat pixelForm
     if(mOutPixelFormat == AV_PIX_FMT_NONE){
         mOutPixelFormat = pixelFormat;
     }
-    mVideoFilter = (filter == nullptr) ? "null", filter;
+    mVideoFilter = (filter == nullptr) ? "null": filter;
     mVideoEnable = true;
 }
 
@@ -169,7 +169,7 @@ int AVFrameFilter::initAudioFilter() {
 
     // 设置输出声道格式
     ret = av_opt_set_bin(mAudioBuffersinkCtx, "channel_layouts", (uint8_t *) &outChannelLayout,
-                         sizeof(), AV_OPT_SEARCH_CHILDREN);
+                         sizeof(outChannelLayout), AV_OPT_SEARCH_CHILDREN);
     if (ret < 0) {
         LOGE("Failed to set output channel layout");
         goto end;
