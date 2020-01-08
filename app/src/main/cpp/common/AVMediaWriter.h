@@ -9,6 +9,8 @@
 #include <map>
 #include <sstream>
 #include <AndroidLog.h>
+#include "AVMediaData.h"
+
 extern "C"{
 #include <libavutil/pixfmt.h>
 #include <libavcodec/avcodec.h>
@@ -48,6 +50,9 @@ public:
 
     int prepare();
 
+    int encodeMediaData(AVMediaData * mediaData);
+
+    int stop();
 
 private:
     void reset();
@@ -55,6 +60,13 @@ private:
     int openOutputFile();
 
     int openEncoder(AVMediaType type);
+
+    int encodeMediaData(AVMediaData* mediaData, int *gotFrame);
+
+    int fillImage(AVMediaData *data);
+
+    int fillSample(AVMediaData *data);
+
 
 private:
     std::map<std::string, std::string> mEncodeOptions;          //编码参数

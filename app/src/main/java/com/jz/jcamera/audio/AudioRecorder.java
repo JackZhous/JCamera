@@ -59,7 +59,9 @@ public class AudioRecorder {
         return true;
     }
 
-
+    public int getChannels() {
+        return channels;
+    }
     /**
      * 录音工作线程
      */
@@ -71,7 +73,7 @@ public class AudioRecorder {
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
         record.startRecording();
         if(callback != null){
-            handler.post(() -> callback.recorderStarted());
+            handler.post(() -> callback.onAudioRecorderStarted());
         }
         int readSize = 0;
         while (isRecording){
@@ -81,12 +83,12 @@ public class AudioRecorder {
                 buffer.position(0);
                 buffer.limit(readSize);
                 buffer.get(data, 0, readSize);
-                handler.post(() -> callback.recorderProgress(data));
+                handler.post(() -> callback.onAudioRecorderProgress(data));
             }
         }
         release();
         if(callback != null){
-            callback.recorderFinish();
+            callback.onAudioRecorderFinish();
         }
     }
 
@@ -103,6 +105,9 @@ public class AudioRecorder {
         isRecording = false;
     }
 
+    public int getSampleRate(){
+        return sampleFormat;
+    }
 
 
     private int caluteBufferSize(int channelLayout, int pcmFormat){
@@ -119,11 +124,11 @@ public class AudioRecorder {
 
 
     public interface AudioRecorderCallback{
-        void recorderStarted();
+        void onAudioRecorderStarted();
 
-        void recorderProgress(byte[] data);
+        void onAudioRecorderProgress(byte[] data);
 
-        void recorderFinish();
+        void onAudioRecorderFinish();
     }
 
     public void setCallback(AudioRecorderCallback callback) {

@@ -67,13 +67,10 @@ void Recorder::setMRecordListener(OnRecordLisenter *listener) {
     mRecordListener = listener;
 }
 
-RecordParams *Recorder::getMRecordParam() const {
-    return mRecordParam;
-}
 
 
 int Recorder::prepare(){
-    if(mMediaWriter == nullptr){
+    if(mMediaWriter != nullptr){
         LOGE("recorder prepare failed");
         return -1;
     }
@@ -93,7 +90,7 @@ int Recorder::prepare(){
         return -1;
     }
 
-    int ret = -1;
+    int ret;
     mFrameQueue = new SafetyQueue<AVMediaData *>();
     LOGI("record param: dst %s, width %d, height %d",param->dstFile, param->width, param->height);
     int outputWidth = param->width;
@@ -263,8 +260,32 @@ void Recorder::run() {
                     continue;
                 }
             }
+
+            //过滤
+            if(mFrameFilter != nullptr &&  mFrameFilter->filterData(data) < 0){
+                LOGE("failed to filter media data: %s", data->getName());
+            }
+
+            //编码
+            ret = mMediaWriter->encodeMediaData(data);
+            if(ret < 0){
+                LOGE("Failed to encoder media data： %s", data->getName());
+            } else{
+                LOGI("recording time: %f", (float)(current - start));
+                if (mRecordListener != nullptr) {
+                    mRecordListener->onRecording((float)(current - start));
+                }
+            }
+
+            //释放资源
+            delete data;
         }
     }
 
-
+    ret = mMediaWriter->stop();
+    mExit = true;
+    mCond.signal();
+    if(mRecordListener != nullptr){
+        mRecordListener->onRecordFinish(ret == 0, (float)(current - start));
+    }
 }

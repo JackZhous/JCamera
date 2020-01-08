@@ -311,3 +311,192 @@ int AVFrameFilter::initVIdeoFilter() {
 
     return ret;
 }
+
+
+int AVFrameFilter::filterData(AVMediaData* data) {
+    if(data->type == MediaAudio){
+        return filterAudio(data);
+    } else if (data->type == MediaVideo){
+        return filterVideo(data);
+    }
+    LOGE("unknown data type");
+    return -1;
+}
+
+int AVFrameFilter::filterAudio(AVMediaData *data) {
+    if(!mAudioEnable){
+        LOGE("unable audio filter");
+        return -1;
+    }
+
+    int ret;
+    AVFrame *srcFrame = av_frame_alloc();
+    if(!srcFrame){
+        LOGE("failed to allocate src frame");
+        return -1;
+    }
+
+    //将音频数据复制到输入帧
+    ret = av_samples_fill_arrays(srcFrame->data, srcFrame->linesize, data->sample, mInChannels,
+            SAMPLE_SIZE, mInSampleFormat, 1);
+
+    if(ret < 0){
+        LOGE("failed to call av_samples_fill_arrays: %s ", av_err2str(ret));
+        freeFrame(srcFrame);
+        return ret;
+    }
+
+    srcFrame->sample_rate = mInSampleFormat;
+    srcFrame->channel_layout = (uint64_t)av_get_default_channel_layout(mInChannels);
+    srcFrame->channels = mInChannels;
+    srcFrame->format = mInSampleFormat;
+    srcFrame->nb_samples = SAMPLE_SIZE;
+
+    //将输入帧放入过滤器输入端
+    ret = av_buffersrc_add_frame_flags(mAudioBuffersrcCtx, srcFrame, 0);
+    if(ret < 0){
+        LOGE("failed to call av_buffersrc_add_frame_flags: %s", av_err2str(ret));
+        freeFrame(srcFrame);
+        return ret;
+    }
+
+    //创建输出端
+    AVFrame *dstFrame = av_frame_alloc();
+    if(!dstFrame){
+        LOGE("failed to allocate dst frame");
+        freeFrame(dstFrame);
+        return -1;
+    }
+
+    //从filter输出端取出音频帧
+    ret = av_buffersink_get_frame(mAudioBuffersinkCtx, dstFrame);
+    if(ret < 0){
+        LOGE("failed to call av_buffersink_get_frame : %s", av_err2str(ret));
+        freeFrame(srcFrame);
+        freeFrame(dstFrame);
+        return -1;
+    }
+    //计算filter后的音频帧大小
+    int size = av_samples_get_buffer_size(dstFrame->linesize, dstFrame->channels,
+            dstFrame->nb_samples, AVSampleFormat(dstFrame->format), 1);
+
+    if(size < 0){
+        LOGE("failed to call av_samples_get_buffer_size :%s", av_err2str(size));
+        freeFrame(srcFrame);
+        freeFrame(dstFrame);
+        return -1;
+    }
+
+    //创建缓冲区
+    uint8_t *sampleBuffer = (uint8_t*)av_malloc((size_t)size);
+    if(sampleBuffer == nullptr){
+        LOGE("failed to allocate memory");
+        freeFrame(srcFrame);
+        freeFrame(dstFrame);
+        return -1;
+    }
+
+    data->free();
+    data->sample = sampleBuffer;
+    data->sample_size = size;
+
+    freeFrame(srcFrame);
+    freeFrame(dstFrame);
+    return 0;
+}
+
+int AVFrameFilter::filterVideo(AVMediaData *data) {
+    if(!mVideoEnable){
+        LOGE("can not filter video");
+        return -1;
+    }
+
+    int ret;
+    //创建输入帧
+    AVFrame* srcFrame = av_frame_alloc();
+    if(!srcFrame){
+        LOGE("failed to allcate src frame");
+        return -1;
+    }
+
+    ret = av_image_fill_arrays(srcFrame->data, srcFrame->linesize, data->image, mInputPixelFormat,
+            mWidth, mHeight, 1);
+    if(ret < 0){
+        LOGE("failed to call av_image_fill_arrays : %s", av_err2str(ret));
+        freeFrame(srcFrame);
+        return ret;
+    }
+
+    srcFrame->width = mWidth;
+    srcFrame->height = mHeight;
+    srcFrame->format = mInputPixelFormat;
+
+    //将输入放入filter输入端
+    ret = av_buffersrc_add_frame_flags(mVideoBuffersrcCtx, srcFrame, 0);
+    if(ret < 0){
+        LOGE("failed to call av_buffersrc_add_frame_flags: %s", av_err2str(ret));
+        freeFrame(srcFrame);
+        return ret;
+    }
+
+    AVFrame* dstFrame = av_frame_alloc();
+    if(!dstFrame){
+        LOGE("failed to allocate dst frame");
+        freeFrame(srcFrame);
+        return -1;
+    }
+
+    ret = av_buffersink_get_frame(mVideoBuffersrcCtx, dstFrame);
+    if(ret < 0){
+        LOGE("failed to call av_buffersink_get_frame: %s", av_err2str(ret));
+        freeFrame(srcFrame);
+        freeFrame(dstFrame);
+        return ret;
+    }
+
+    //计算过滤后的大小
+    int size = av_image_get_buffer_size(AVPixelFormat(dstFrame->format), dstFrame->width, dstFrame->height, 1);
+    if(size < 0){
+        LOGE("failed to get image buffer size: %s", av_err2str(size));
+        freeFrame(srcFrame);
+        freeFrame(dstFrame);
+        return -1;
+    }
+
+    //创建缓冲区
+    uint8_t * imageBuffer = (uint8_t*)av_malloc((size_t)size);
+    if(imageBuffer == nullptr){
+        LOGE("failed allocate image buffer");
+        freeFrame(srcFrame);
+        freeFrame(dstFrame);
+        return -1;
+    }
+
+    ret = av_image_copy_to_buffer(imageBuffer, size, (const uint8_t**)dstFrame->data, dstFrame->linesize,
+            AVPixelFormat(dstFrame->format), dstFrame->width, dstFrame->height, 1);
+    if(ret < 0){
+        freeFrame(srcFrame);
+        freeFrame(dstFrame);
+        av_free(imageBuffer);
+        return -1;
+    }
+
+    data->free();
+    data->image = imageBuffer;
+    data->length = size;
+    data->width = dstFrame->width;
+    data->height = dstFrame->height;
+    data->pixelFormat = pixelFormatConvert(AVPixelFormat(dstFrame->format));
+
+    freeFrame(srcFrame);
+    freeFrame(dstFrame);
+
+    return 0;
+}
+
+
+void AVFrameFilter::freeFrame(AVFrame *frame) {
+    if(frame){
+        av_frame_free(&frame);
+    }
+}

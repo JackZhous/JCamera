@@ -411,3 +411,168 @@ void AVMediaWriter::setMUseTimeStamp(bool mUseTimeStamp) {
 void AVMediaWriter::setMMaxBitRate(int64_t mMaxBitRate) {
     AVMediaWriter::mMaxBitRate = mMaxBitRate;
 }
+
+int AVMediaWriter::encodeMediaData(AVMediaData *mediaData) {
+    return encodeMediaData(mediaData, nullptr);
+}
+
+int AVMediaWriter::encodeMediaData(AVMediaData *mediaData, int *gotFrame) {
+    int ret =0, gotFrameLocal;
+    if(!gotFrame){
+        gotFrame = &gotFrameLocal;
+    }
+    *gotFrame = 0;
+
+    bool isVideo = (mediaData->type == MediaVideo);
+    AVCodecContext *codecCtx = isVideo ? pVideoCodecCtx : pAudioCodecCtx;
+    AVStream* stream = isVideo ? pVideoStream : pAudioStream;
+    AVFrame* frame = isVideo ? mImageFrame : mSampleFrame;
+    uint8_t * data = isVideo ? mediaData->image : mediaData->sample;
+    const char *type = isVideo ? "video" : "audio";
+
+    //判断是否支持编码
+    if((isVideo && !mHasVideo) || (!isVideo && !mHasAudio)){
+        LOGE("no support current type : %s", type);
+        return 0;
+    }
+
+    if(data != nullptr){
+        ret = isVideo ? fillImage(mediaData) : fillSample(mediaData);
+        if (ret < 0){
+            return -1;
+        }
+    }
+
+    //初始化数据包
+    AVPacket packet;
+    packet.data = nullptr;
+    packet.size = 0;
+    av_init_packet(&packet);
+    //编码
+    ret = avcodec_send_frame(codecCtx, frame);
+    if (ret< 0){
+        if(ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
+            return 0;
+        }
+        LOGE("failed to call avcodec_send_frame: %s", av_err2str(ret));
+        return ret;
+    }
+
+    while (ret >= 0){
+        ret = avcodec_receive_packet(codecCtx, &packet);
+        if(ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
+            break;
+        } else if(ret < 0){
+            LOGE("Failed to call avcodec_receive_packet: %s, type: %s", av_err2str(ret), type);
+            return ret;
+        }
+
+        //计算输出pts
+        av_packet_rescale_ts(&packet, codecCtx->time_base, stream->time_base);
+        packet.stream_index = stream->index;
+
+        //写入文件
+        ret = av_interleaved_write_frame(pFormatCtx, &packet);
+        if(ret < 0){
+            LOGE("failed to call av_interleaved_write_frame %s type %s", av_err2str(ret), type);
+            return ret;
+        }
+        *gotFrame = 1;
+    }
+
+    return 0;
+}
+
+int AVMediaWriter::fillImage(AVMediaData *data) {
+    int ret = 0;
+    ret = av_image_fill_arrays(mImageFrame->data, mImageFrame->linesize, data->image,
+            getPixelFormat((PixelFormat)data->pixelFormat), data->width, data->height, 1);
+    if(ret < 0){
+        LOGE("av_image_fill_arrays error: %s, [%d, %d, %s], [%d, %d], [%d, %d, %s]",
+             av_err2str(ret), mImageFrame->width, mImageFrame->height,
+             av_get_pix_fmt_name((AVPixelFormat) mImageFrame->format), mWidth, mHeight,
+             data->width, data->height, av_get_pix_fmt_name(getPixelFormat((PixelFormat)data->pixelFormat)));
+        return -1;
+    }
+
+    if(!mUseTimeStamp){
+        mImageFrame->pts = mImageCount++;
+    } else{
+        if(mStartPts == 0){
+            mImageFrame->pts = 0;
+            mStartPts = data->pts;
+        } else{
+            mImageFrame->pts = data->pts - mStartPts;
+        }
+
+        if(mImageFrame->pts == mLastPts){
+            mImageFrame->pts += 10;
+        }
+        mLastPts = mImageFrame->pts;
+    }
+
+    return 0;
+}
+
+int AVMediaWriter::fillSample(AVMediaData *data) {
+    int ret;
+    if(pAudioCodecCtx->channels != mChannels || pAudioCodecCtx->sample_fmt != mSampleFormat ||
+            pAudioCodecCtx->sample_rate != mSampleRate){
+        ret = swr_convert(pSampleConvertCtx, mSampleBuffer, pAudioCodecCtx->frame_size,
+                          (const uint8_t**)&data->sample, pAudioCodecCtx->frame_size);
+        if(ret <= 0){
+            LOGE("swr_convert error : %s", av_err2str(ret));
+            return -1;
+        }
+
+        avcodec_fill_audio_frame(mSampleFrame, mChannels, pAudioCodecCtx->sample_fmt,
+                                 mSampleBuffer[0], mSampleSize, 0);
+        for(int i = 0; i < mSamplePlanes; i++){
+            mSampleFrame->data[i] = mSampleBuffer[i];
+            mSampleFrame->linesize[i] = mSampleSize;
+        }
+    } else{
+        ret = av_samples_fill_arrays(mSampleFrame->data, mSampleFrame->linesize, data->sample,
+                                        pAudioCodecCtx->channels, mSampleFrame->nb_samples,
+                                        pAudioCodecCtx->sample_fmt, 1);
+    }
+
+    if(ret < 0){
+        LOGE("failed to call av_samples_fill_arrays: %s", av_err2str(ret));
+        return -1;
+    }
+    mSampleFrame->pts = mNbSamples;
+    mNbSamples += mSampleFrame->nb_samples;
+
+    return 0;
+}
+
+int AVMediaWriter::stop() {
+    int ret = 0, gotFrame;
+    LOGI("flushing video encoder");
+    AVMediaData *data = new AVMediaData();
+    if(mHasVideo){
+        data->type = MediaVideo;
+        while (true){
+            ret = encodeMediaData(data, &gotFrame);
+            if(ret < 0 || !gotFrame){
+                break;
+            }
+        }
+    }
+
+    if(mHasAudio){
+        data->type = MediaAudio;
+        while (true){
+            ret = encodeMediaData(data, &gotFrame);
+            if(ret < 0 || !gotFrame){
+                break;
+            }
+        }
+    }
+
+    delete data;
+    av_write_trailer(pFormatCtx);
+
+    return ret;
+}

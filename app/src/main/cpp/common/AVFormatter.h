@@ -119,5 +119,21 @@ inline libyuv::FourCC getFourCC(PixelFormat format){
     return libyuv::FOURCC_ANY;
 }
 
+inline PixelFormat pixelFormatConvert(AVPixelFormat format){
+    switch (format){
+        case AV_PIX_FMT_NV12:
+            return PIXEL_FORMAT_NV12;
+
+        case AV_PIX_FMT_NV21:
+            return PIXEL_FORMAT_NV21;
+
+        case AV_PIX_FMT_YUV420P:
+            return PIXEL_FORMAT_YUV420P;
+
+        default:
+            return PIXEL_FORMAT_NONE;
+    }
+}
+
 
 #endif //JCAMERA_AVFORMATTER_H

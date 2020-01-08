@@ -6,10 +6,11 @@
 #define JCAMERA_YUVCONVERTOR_H
 
 #include "YUVData.h"
-#include "AVFormatter.h
+#include "AVFormatter.h"
 #include "AVMediaData.h"
 #include <libyuv/convert.h>
 #include <libyuv/scale.h>
+#include <AndroidLog.h>
 
 class YUVConvertor {
 public:
@@ -37,7 +38,7 @@ public:
 
     int getOutputHeight();
 
-    int convert(AVMediaData* mediaData));
+    int convert(AVMediaData* mediaData);
 
 private:
     int scale(YUVData *src, int srcW, int srcH);

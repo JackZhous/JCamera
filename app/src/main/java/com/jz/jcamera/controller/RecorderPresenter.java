@@ -12,7 +12,10 @@ import com.jz.jcamera.audio.AudioRecorder;
 import com.jz.jcamera.camera.CameraHelper;
 import com.jz.jcamera.camera.CameraManager;
 import com.jz.jcamera.camera.CameraParam;
+import com.jz.jcamera.recorder.FFRecordBulder;
 import com.jz.jcamera.recorder.FFmpegRecorder;
+import com.jz.jcamera.util.AVFormatter;
+import com.jz.jcamera.util.FileUtil;
 import com.jz.jcamera.util.JLog;
 
 import java.lang.ref.WeakReference;
@@ -28,7 +31,8 @@ import java.lang.ref.WeakReference;
  **/
 public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListener,
                                             AudioRecorder.AudioRecorderCallback,
-                                            Camera.PreviewCallback {
+                                            Camera.PreviewCallback,
+                                            OnRecordListener{
 
     FFmpegRecorder recorder;
     private CameraManager cameraHelper;
@@ -42,7 +46,6 @@ public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListene
         mainWeak = new WeakReference<>(context);
         cameraHelper = new CameraManager();
         handler = new Handler(Looper.myLooper());
-        recorder = new FFmpegRecorder(handler);
         audioRecorder = new AudioRecorder();
     }
 
@@ -74,14 +77,35 @@ public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListene
 
 
     public void startRecord(){
+        prepareRecord();
         isRecording = audioRecorder.startRecord();
     }
 
+    private void prepareRecord(){
+        if(recorder != null){
+            recorder.release();
+        }
+
+        recorder = new FFRecordBulder(FileUtil.getVideoCachePath(getContext()))
+                    .setWH(CameraParam.getInstance().expectWidth, CameraParam.getInstance().expectHeight)
+                    .setmRotate(CameraParam.getInstance().orientation)
+                    .setmFrameRate(25)
+                    .setmPixelFormat(AVFormatter.PIXEL_FORMAT_NV21)
+                    .setAudioParams(audioRecorder.getSampleRate(),
+                            AVFormatter.getSampleFormat(audioRecorder.getSampleRate()),
+                            audioRecorder.getChannels())
+                    .setListener(this)
+                    .build();
+        recorder.startRecord();
+
+    }
+
     public void stopRecord(){
+        isRecording = false;
         audioRecorder.stop();
         cameraHelper.stopPreview();
         cameraHelper.releaseCamera();
-        isRecording = false;
+        recorder.stopRecord();
     }
 
 
@@ -97,25 +121,26 @@ public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListene
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         if(isRecording){
-            JLog.i("视频data"+data.length);
+            recorder.recordVIdeo(data, data.length, CameraParam.getInstance().expectWidth,
+                    CameraParam.getInstance().expectHeight, AVFormatter.PIXEL_FORMAT_NV21);
         }
     }
 
     @Override
-    public void recorderStarted() {
-
+    public void onAudioRecorderStarted() {
+        JLog.i("音频录音启动");
     }
 
     @Override
-    public void recorderProgress(byte[] data) {
+    public void onAudioRecorderProgress(byte[] data) {
         if(isRecording){
-            JLog.i("音频data"+data.length);
+            recorder.recordAudio(data, data.length);
         }
     }
 
     @Override
-    public void recorderFinish() {
-
+    public void onAudioRecorderFinish() {
+        JLog.i("音频录音结束");
     }
 
 
@@ -123,5 +148,25 @@ public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListene
         audioRecorder.stop();
         cameraHelper.stopPreview();
         cameraHelper.releaseCamera();
+    }
+
+    @Override
+    public void onRecordStart() {
+        JLog.i("java onRecordStart");
+    }
+
+    @Override
+    public void onRecording(float duration) {
+        JLog.i("java onRecording");
+    }
+
+    @Override
+    public void onRecordFinish(boolean success, float duration) {
+        JLog.i("java onRecordFinish");
+    }
+
+    @Override
+    public void onRecordError(String msg) {
+        JLog.i("java onRecordError");
     }
 }

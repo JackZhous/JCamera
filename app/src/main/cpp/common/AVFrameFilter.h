@@ -6,13 +6,16 @@
 #define JCAMERA_AVFRAMEFILTER_H
 
 
-
+#include "AVMediaData.h"
 
 extern "C"{
 #include <libavutil/pixfmt.h>
 #include <libavfilter/avfilter.h>
 #include <libavformat/avformat.h>
 #include <libavutil/opt.h>
+#include <libavfilter/buffersrc.h>
+#include <libavfilter/buffersink.h>
+#include <libavutil/imgutils.h>
 };
 
 class AVFrameFilter {
@@ -35,6 +38,20 @@ public:
     int initVIdeoFilter();
 
     int initAudioFilter();
+
+
+    int filterData(AVMediaData* data);
+
+
+
+private:
+    void freeFrame(AVFrame* frame);
+
+    //音频音频转码
+    int filterAudio(AVMediaData* data);
+
+    //创建视频转码
+    int filterVideo(AVMediaData* data);
 
 private:
     int mWidth;

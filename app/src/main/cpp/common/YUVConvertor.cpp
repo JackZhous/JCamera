@@ -2,8 +2,7 @@
 // Created by jackzhous on 2019/12/27.
 //
 
-#include <AndroidLog.h>
-#include <opencl-c.h>
+
 #include "YUVConvertor.h"
 
 

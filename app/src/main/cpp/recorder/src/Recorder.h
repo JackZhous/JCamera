@@ -65,8 +65,6 @@ class Recorder : public Runnable{
 
         RecordParams *getRecordParams();
 
-        RecordParams *getMRecordParam() const;
-
 private:
     Mutex mMutex;
     Condition mCond;
