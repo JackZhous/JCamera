@@ -86,7 +86,7 @@ public class CameraManager implements CameraHelper{
 
     private int calculateCameraPreviewOrientation(Activity activity) {
         Camera.CameraInfo info = new Camera.CameraInfo();
-        Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
+        Camera.getCameraInfo(camerId, info);
         int rotation = activity.getWindowManager().getDefaultDisplay()
                 .getRotation();
         int degrees = 0;
@@ -199,7 +199,7 @@ public class CameraManager implements CameraHelper{
         Camera.Parameters parameters = camera.getParameters();
         Camera.Size size = calculatePerfectSize(parameters.getSupportedPictureSizes(),
                             expWidth, expHeight, CalculateType.Max);
-        parameters.setPictureSize(size.width, size.height);
+        parameters.setPictureSize(1280, 720);
         camera.setParameters(parameters);
     }
 

@@ -40,6 +40,7 @@ public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListene
     private AudioRecorder audioRecorder;
     private Handler handler;
     boolean isRecording;
+    private int recordWidth, recordHeight;
 
 
     public RecorderPresenter(RecorderCallBack context) {
@@ -54,9 +55,18 @@ public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListene
     public void openCamera(){
         audioRecorder.setCallback(this);
         cameraHelper.openCamera(mainWeak.get().getContext(), handler);
+        recordWidth = CameraParam.getInstance().previewWidth;
+        recordHeight = CameraParam.getInstance().previewHeight;
         if(mainWeak.get() != null){
-            mainWeak.get().updateTextureSize(CameraParam.getInstance().expectWidth,
-                                                CameraParam.getInstance().expectHeight);
+            int width, height;
+            if(CameraParam.getInstance().orientation == 90 || CameraParam.getInstance().orientation == 270){
+                width = CameraParam.getInstance().previewHeight;
+                height = CameraParam.getInstance().previewWidth;
+            }else {
+                width = CameraParam.getInstance().previewWidth;
+                height = CameraParam.getInstance().previewHeight;
+            }
+            mainWeak.get().updateTextureSize(width, height);
         }
     }
 
@@ -87,7 +97,7 @@ public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListene
         }
 
         recorder = new FFRecordBulder(FileUtil.getVideoCachePath(getContext()))
-                    .setWH(CameraParam.getInstance().expectWidth, CameraParam.getInstance().expectHeight)
+                    .setWH(recordWidth, recordHeight)
                     .setmRotate(CameraParam.getInstance().orientation)
                     .setmFrameRate(25)
                     .setmPixelFormat(AVFormatter.PIXEL_FORMAT_NV21)
@@ -121,8 +131,8 @@ public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListene
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         if(isRecording){
-            recorder.recordVIdeo(data, data.length, CameraParam.getInstance().expectWidth,
-                    CameraParam.getInstance().expectHeight, AVFormatter.PIXEL_FORMAT_NV21);
+            recorder.recordVIdeo(data, data.length, recordWidth,
+                    recordHeight, AVFormatter.PIXEL_FORMAT_NV21);
         }
     }
 
