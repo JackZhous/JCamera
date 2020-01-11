@@ -132,7 +132,7 @@ int Recorder::prepare(){
 
     mMediaWriter = new AVMediaWriter();
     mMediaWriter->setMUseTimeStamp(true);
-    mMediaWriter->addEncodeOptions("preset", "uktrafast");
+    mMediaWriter->addEncodeOptions("preset", "ultrafast");
     mMediaWriter->setQuality(param->quality > 0 ? param->quality : 23);
     mMediaWriter->setMMaxBitRate(param->maxRate);
     mMediaWriter->setOutoutPath(param->dstFile);

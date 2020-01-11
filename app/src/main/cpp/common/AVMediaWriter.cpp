@@ -99,6 +99,7 @@ int AVMediaWriter::openOutputFile() {
     }
 
     //如果存在视频流，创建视频缓冲帧对象
+
     if(mHasVideo){
         mImageFrame = av_frame_alloc();
         if(!mImageFrame){
@@ -198,7 +199,7 @@ int AVMediaWriter::openEncoder(AVMediaType type) {
     //根据指定的编码器名称查找编码器
     if(type == AVMEDIA_TYPE_AUDIO){
         encodeName = mAudioEncodeName;
-    } else if(type == AVMEDIA_TYPE_VIDEO){
+    } else {
         encodeName = mVideoEncodeName;
     }
 
@@ -213,7 +214,7 @@ int AVMediaWriter::openEncoder(AVMediaType type) {
 
         if(type == AVMEDIA_TYPE_VIDEO){
             encoder = avcodec_find_encoder(mVideoCodecId);
-        } else if(type == AVMEDIA_TYPE_AUDIO){
+        } else {
             encoder = avcodec_find_encoder(mAudioCodecId);
         }
     }

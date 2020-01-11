@@ -106,7 +106,7 @@ public class AudioRecorder {
     }
 
     public int getSampleRate(){
-        return sampleFormat;
+        return SAMPLE_RATE;
     }
 
 

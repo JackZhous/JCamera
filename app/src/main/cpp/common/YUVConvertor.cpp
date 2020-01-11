@@ -129,6 +129,8 @@ int YUVConvertor::convert(AVMediaData *mediaData) {
     }
 
     fillMediaData(mediaData, output, outputWidth, outputHeight);
+
+    return 0;
 }
 
 
@@ -140,7 +142,7 @@ int YUVConvertor::convert(AVMediaData *mediaData) {
  * @param srcH
  */
 void YUVConvertor::fillMediaData(AVMediaData *model, YUVData *src, int srcW, int srcH) {
-    uint8_t *image = new uint8_t[srcW * srcH *3 / 2];
+    uint8_t *image = new uint8_t[srcW * srcH * 3 / 2];
     if(model != nullptr){
         model->free();
     } else{
@@ -148,8 +150,8 @@ void YUVConvertor::fillMediaData(AVMediaData *model, YUVData *src, int srcW, int
     }
     model->image = image;
     memcpy(model->image, src->dataY, (size_t)srcW * srcH);
-    memcpy(model->image+ srcW* srcH, src->dataU, (size_t)srcW * srcH / 4);
-    memcpy(model->image+ srcW* srcH * 5 /4, src->dataV, (size_t)srcW * srcH / 4);
+    memcpy(model->image + srcW* srcH, src->dataU, (size_t)srcW * srcH / 4);
+    memcpy(model->image + srcW* srcH * 5 /4, src->dataV, (size_t)srcW * srcH / 4);
     model->length = srcW * srcH * 3 / 2;
     model->width = srcW;
     model->height = srcH;
