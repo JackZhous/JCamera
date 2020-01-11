@@ -251,7 +251,7 @@ int YUVConvertor::prepare() {
         pCropData->alloc(width, height);
     }
 
-    if(mScaleWidth>0 && mScaleHeight > 0){
+    if(mScaleWidth > 0 && mScaleHeight > 0){
         pScaleData = new YUVData();
         pScaleData->alloc(mScaleWidth, mScaleHeight);
     }

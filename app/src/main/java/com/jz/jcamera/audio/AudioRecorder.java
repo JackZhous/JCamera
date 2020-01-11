@@ -109,6 +109,10 @@ public class AudioRecorder {
         return SAMPLE_RATE;
     }
 
+    public int getSampleFormat(){
+        return sampleFormat;
+    }
+
 
     private int caluteBufferSize(int channelLayout, int pcmFormat){
         int size = 1024;

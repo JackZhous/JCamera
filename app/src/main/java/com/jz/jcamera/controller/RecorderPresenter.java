@@ -102,7 +102,7 @@ public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListene
                     .setmFrameRate(25)
                     .setmPixelFormat(AVFormatter.PIXEL_FORMAT_NV21)
                     .setAudioParams(audioRecorder.getSampleRate(),
-                            AVFormatter.getSampleFormat(audioRecorder.getSampleRate()),
+                            AVFormatter.getSampleFormat(audioRecorder.getSampleFormat()),
                             audioRecorder.getChannels())
                     .setListener(this)
                     .build();

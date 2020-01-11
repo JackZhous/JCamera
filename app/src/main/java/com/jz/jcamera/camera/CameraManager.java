@@ -150,9 +150,6 @@ public class CameraManager implements CameraHelper{
     }
 
 
-
-
-
     public void stopPreview(){
         if(camera == null){
             return;
