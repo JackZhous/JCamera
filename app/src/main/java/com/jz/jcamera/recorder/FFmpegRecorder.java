@@ -41,6 +41,7 @@ public class FFmpegRecorder {
     native void _release(long pointer);
     native void _startRecord(long pointer);
     native void _stopRecord(long pointer);
+    native void _setFrontCamera(long pointer);              //设置前置摄像头
 
     native void _setRecordListener(long pointer, OnRecordListener listener);
 
@@ -51,6 +52,8 @@ public class FFmpegRecorder {
     native void _recordVideoFrame(long pointer, byte[] data, int len, int width, int height, int pixelFormat);
 
     private String dstUrl;
+
+
 
     public FFmpegRecorder() {
         nativeHandler = nativeInit();
@@ -133,5 +136,9 @@ public class FFmpegRecorder {
 
     public void recordVIdeo(byte[] data, int len, int width, int height, int pixelFormat){
         _recordVideoFrame(nativeHandler, data, len, width, height, pixelFormat);
+    }
+
+    public void setFrontCamerEnable(){
+        _setFrontCamera(nativeHandler);
     }
 }

@@ -100,7 +100,8 @@ int Recorder::prepare(){
     mYuvConvert->setCrop(param->cropX, param->cropY, param->cropWidth, param->cropHeight);
     mYuvConvert->setRotate(param->rotateDegree);
     mYuvConvert->setScale(param->scaleWidth, param->scaleHeight);
-    mYuvConvert->setMirror(param->mirror);
+    //前置摄像头需要镜像
+    mYuvConvert->setMirror(param->isFrontCamera);
 
     if(mYuvConvert->prepare() < 0){
         delete mYuvConvert;
@@ -138,6 +139,8 @@ int Recorder::prepare(){
     mMediaWriter->setOutoutPath(param->dstFile);
     mMediaWriter->setOutputVideo(outputWidth, outputHeight, param->frameRate, videoFormat);
     mMediaWriter->setOutputAudio(param->sampleRate, param->channels, audioFormat);
+    //前置摄像头需要转换
+    mMediaWriter->setRotate(param->isFrontCamera ? "180" : nullptr);
 
     //准备
     ret = mMediaWriter->prepare();

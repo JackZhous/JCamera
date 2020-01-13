@@ -54,6 +54,8 @@ public:
 
     int stop();
 
+    void setRotate(const char* rotate);
+
 private:
     void reset();
 
@@ -83,6 +85,7 @@ private:
     const char *mVideoEncodeName;                   //指定编码器名称
     bool mUseTimeStamp;                     //是否使用时间戳计算pts
     bool mHasVideo;                         //是否存在视频流数据
+    const char *mRotate;                     //前置摄像头 需要旋转180度
 
     int mSampleRate;
     int mChannels;

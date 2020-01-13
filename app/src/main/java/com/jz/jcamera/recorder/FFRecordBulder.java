@@ -30,6 +30,7 @@ public class FFRecordBulder {
     private int mChannels;
     private String mAudioEncoder;   // 指定音频编码器名称
     private String mAudioFilter;    // 音频AVFilter描述
+    private boolean isBackCamera = false;
 
     public FFRecordBulder(String dstUrl) {
         this.dstUrl = dstUrl;
@@ -107,6 +108,11 @@ public class FFRecordBulder {
         return this;
     }
 
+    public FFRecordBulder setBackCameraEnable() {
+        this.isBackCamera = true;
+        return this;
+    }
+
     public FFRecordBulder setAudioParams(int sampleRate, int sampleFormat, int channels){
         mSampleRate = sampleRate;
         mSampleFormat = sampleFormat;
@@ -133,6 +139,10 @@ public class FFRecordBulder {
         }
         if (!mAudioFilter.equalsIgnoreCase("anull")) {
             recorder.setAudioFilter(mAudioFilter);
+        }
+        //前置摄像头需要改变角度和选择
+        if(!isBackCamera){
+            recorder.setFrontCamerEnable();
         }
         return recorder;
     }

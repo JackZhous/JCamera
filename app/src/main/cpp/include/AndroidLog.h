@@ -36,6 +36,7 @@
 // 获取当前时钟(ms)
 inline uint64_t getCurrentTimeMs() {
     struct timeval tv;
+    //获取1970年1月1日的秒数和微秒数
     gettimeofday(&tv, nullptr);
     uint64_t us = (uint64_t) (tv.tv_sec) * 1000 * 1000 + (uint64_t) (tv.tv_usec);
     return us / 1000;

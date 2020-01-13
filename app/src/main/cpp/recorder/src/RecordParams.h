@@ -42,6 +42,7 @@ public:
 
     const char* videoFilter;
     const char* audioFilter;            //滤镜描述
+    bool isFrontCamera;                 //是否为前置社小偷
 
 
     public:

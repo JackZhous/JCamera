@@ -51,7 +51,6 @@ public class CameraManager implements CameraHelper{
     }
 
 
-
     @Override
     public void initCamera(SurfaceTexture texture) {
     }
@@ -154,7 +153,6 @@ public class CameraManager implements CameraHelper{
         if(camera == null){
             return;
         }
-
         camera.stopPreview();
     }
 
@@ -163,6 +161,7 @@ public class CameraManager implements CameraHelper{
             return;
         }
         camera.release();
+        camera = null;
     }
 
     private SurfaceTexture texture = null;

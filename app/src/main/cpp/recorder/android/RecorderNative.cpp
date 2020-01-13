@@ -282,6 +282,13 @@ void recordVideoFrame(JNIEnv* env, jobject thiz, jlong point, jbyteArray jdata, 
     }
 }
 
+void setFontCamera(JNIEnv* env, jobject thiz, jlong point){
+    Recorder* recorder = (Recorder*)point;
+    if(recorder != nullptr){
+        recorder->getRecordParams()->isFrontCamera = true;
+    }
+}
+
 
 
 
@@ -301,7 +308,8 @@ static const JNINativeMethod nativeToJavaMethod[] = {
         {"_startRecord", "(J)V", (void*)startRecord},
         {"_stopRecord", "(J)V", (void*)stopRecord},
         {"_recordAudioFrame", "(J[BI)V", (void*)recordAudioFrame},
-        {"_recordVideoFrame", "(J[BIIII)V", (void*)recordVideoFrame}
+        {"_recordVideoFrame", "(J[BIIII)V", (void*)recordVideoFrame},
+        {"_setFrontCamera", "(J)V", (void*)setFontCamera}
 };
 
 int registerJavaMethod(JNIEnv* env){

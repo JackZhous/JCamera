@@ -38,6 +38,10 @@ void AVMediaWriter::setQuality(int quality) {
     mEncodeOptions["crf"] = str;
 }
 
+void AVMediaWriter::setRotate(const char *rotate) {
+    mRotate = av_strdup(rotate);
+}
+
 
 void AVMediaWriter::setOutputVideo(int width, int height, int frameRate, AVPixelFormat pixFormat) {
     mWidth = width;
@@ -240,6 +244,10 @@ int AVMediaWriter::openEncoder(AVMediaType type) {
 
     //处理参数
     if (type == AVMEDIA_TYPE_VIDEO){
+        //前置摄像头需要旋转角度  镜像 也可以直接对源数据处理
+        if(mRotate != nullptr){
+            av_dict_set(&stream->metadata, "rotate", "180", 0);
+        }
         codecCtx->width = mWidth;
         codecCtx->height = mHeight;
         codecCtx->pix_fmt = mPixelFormat;
