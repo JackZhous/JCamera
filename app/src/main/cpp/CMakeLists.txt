@@ -23,7 +23,6 @@ add_library( # Sets the name of the library.
 
         # Provides a relative path to your source file(s).
         IMPORTED)
-
 set_target_properties(ffmpeg
         PROPERTIES IMPORTED_LOCATION
         ${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/libffmpeg.so)
@@ -43,5 +42,4 @@ set_target_properties(yuv
 
 
 #添加播放器源代码,因为这里有一也有一个cmake
-add_subdirectory(${CMAKE_SOURCE_DIR}/player)
 add_subdirectory(${CMAKE_SOURCE_DIR}/recorder)

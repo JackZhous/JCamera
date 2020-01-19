@@ -17,7 +17,6 @@ extern "C"{
 #include <libavfilter/buffersink.h>
 #include <libavutil/imgutils.h>
 #include <libavfilter/buffersink.h>
-
 };
 
 class AVFrameFilter {
