@@ -46,7 +46,7 @@ public class RenderHandler extends Handler {
     // 切换动态彩妆
     public static final int MSG_CHANGE_DYNAMIC_MAKEUP = 0x16;
     // 切换动态动态资源
-    public static final int MSG_CHANGE_DYNAMIC_RESOURCE = 0x17;
+    public static final int MSG_SET_EFFECT = 0x17;
     //直接drawFrame
     public static final int MSG_DRAW_FRAME = 0x18;
 
@@ -108,6 +108,11 @@ public class RenderHandler extends Handler {
 
             case MSG_TAKE_PICTURE:
                 thread.takePhoto();
+                break;
+
+
+            case MSG_SET_EFFECT:
+                thread.setEffectId(msg.arg1);
                 break;
         }
     }

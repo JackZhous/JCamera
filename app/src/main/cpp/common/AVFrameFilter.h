@@ -16,6 +16,8 @@ extern "C"{
 #include <libavfilter/buffersrc.h>
 #include <libavfilter/buffersink.h>
 #include <libavutil/imgutils.h>
+#include <libavfilter/buffersink.h>
+
 };
 
 class AVFrameFilter {
@@ -59,7 +61,7 @@ private:
     int mFrameRate;
     AVPixelFormat  mInputPixelFormat;
     AVPixelFormat  mOutPixelFormat;
-    const char* mVideoFilter;           //视频过滤器描述
+    const char* mVideoFilter;           //视频过滤器描述 如黑白特效"lutyuv='u=128:v=128'";
     bool mVideoEnable;
 
     AVFilterContext* mVideoBuffersinkCtx;    //AVFilter输出端

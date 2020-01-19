@@ -67,7 +67,7 @@ void AVFrameFilter::setVideoInput(int width, int height, AVPixelFormat pixelForm
         mOutPixelFormat = pixelFormat;
     }
     mVideoFilter = (filter == nullptr) ? "null": filter;
-    mVideoEnable = true;
+    mVideoEnable = (strcmp(mVideoFilter, "null") != 0);;
 }
 
 
@@ -92,7 +92,8 @@ void AVFrameFilter::setAudioInput(int sampleRate, int channels, AVSampleFormat f
     }
 
     mAudioFilter = (filter == nullptr) ? "anull" : filter;
-    mAudioEnable = true;
+
+    mAudioEnable = (strcmp(mAudioFilter, "anull") != 0);
 }
 
 int AVFrameFilter::initFilter() {
@@ -140,6 +141,7 @@ int AVFrameFilter::initAudioFilter() {
              timebase.num, timebase.den, mInSampleRate, av_get_sample_fmt_name(mInSampleFormat),
              av_get_default_channel_layout(mInChannels));
 
+    LOGI("audio filter: %s", args);
     // 创建音频过滤器输入缓冲区
     ret = avfilter_graph_create_filter(&mAudioBuffersrcCtx, bufferSrc, "in",
                                        args, nullptr, mAudioFilterGraph);
@@ -251,7 +253,7 @@ int AVFrameFilter::initVIdeoFilter() {
     snprintf(args, sizeof(args), "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
                                 mWidth, mHeight, mInputPixelFormat, timeBase.num, timeBase.den,
                                 ratio.num, ratio.den);
-
+    LOGI("video filter: %s", args);
     //创建视频过滤器输入缓冲区 并且初始化
     ret = avfilter_graph_create_filter(&mVideoBuffersrcCtx, bufferSrc, "in", args, nullptr,
                                             mVideoFilterGraph);
@@ -263,6 +265,7 @@ int AVFrameFilter::initVIdeoFilter() {
     //创建视频过滤输出缓冲区
     ret = avfilter_graph_create_filter(&mVideoBuffersinkCtx, bufferSink, "out", nullptr, nullptr,
                                             mVideoFilterGraph);
+
     if(ret < 0){
         LOGE("failed to create video buffer sink");
         goto end;
@@ -279,6 +282,7 @@ int AVFrameFilter::initVIdeoFilter() {
     //绑定输入端
     output->name = av_strdup("in");
     output->filter_ctx = mVideoBuffersrcCtx;
+    //filter_ctx的序号
     output->pad_idx = 0;
     output->next = nullptr;
 
@@ -326,7 +330,7 @@ int AVFrameFilter::filterData(AVMediaData* data) {
 int AVFrameFilter::filterAudio(AVMediaData *data) {
     if(!mAudioEnable){
         LOGE("unable audio filter");
-        return -1;
+        return 0;
     }
 
     int ret;
@@ -355,7 +359,7 @@ int AVFrameFilter::filterAudio(AVMediaData *data) {
     //将输入帧放入过滤器输入端
     ret = av_buffersrc_add_frame_flags(mAudioBuffersrcCtx, srcFrame, 0);
     if(ret < 0){
-        LOGE("failed to call av_buffersrc_add_frame_flags: %s", av_err2str(ret));
+        LOGE("audio failed to call av_buffersrc_add_frame_flags: %s", av_err2str(ret));
         freeFrame(srcFrame);
         return ret;
     }
@@ -408,7 +412,7 @@ int AVFrameFilter::filterAudio(AVMediaData *data) {
 int AVFrameFilter::filterVideo(AVMediaData *data) {
     if(!mVideoEnable){
         LOGE("can not filter video");
-        return -1;
+        return 0;
     }
 
     int ret;
@@ -434,7 +438,7 @@ int AVFrameFilter::filterVideo(AVMediaData *data) {
     //将输入放入filter输入端
     ret = av_buffersrc_add_frame_flags(mVideoBuffersrcCtx, srcFrame, 0);
     if(ret < 0){
-        LOGE("failed to call av_buffersrc_add_frame_flags: %s", av_err2str(ret));
+        LOGE("video failed to call av_buffersrc_add_frame_flags: %s", av_err2str(ret));
         freeFrame(srcFrame);
         return ret;
     }
@@ -446,7 +450,7 @@ int AVFrameFilter::filterVideo(AVMediaData *data) {
         return -1;
     }
 
-    ret = av_buffersink_get_frame(mVideoBuffersrcCtx, dstFrame);
+    ret = av_buffersink_get_frame(mVideoBuffersinkCtx, dstFrame);
     if(ret < 0){
         LOGE("failed to call av_buffersink_get_frame: %s", av_err2str(ret));
         freeFrame(srcFrame);

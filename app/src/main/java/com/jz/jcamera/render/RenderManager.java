@@ -44,7 +44,15 @@ public class RenderManager {
     //坐标缓冲
     private ScaleType scaleType = ScaleType.CENTER_CROP;
 
+    //特效id
+    private int effectId = 6;
+
     private RenderManager() {
+    }
+
+
+    public void setEffectId(int effectId) {
+        this.effectId = effectId;
     }
 
     public static RenderManager getInstance(){
@@ -94,9 +102,13 @@ public class RenderManager {
 
     private void initFilters(){
         releaseFilters();
-        filterArrays.put(BaseFilter.CameraIndex, new GLImageOESInputFilter(context));
-        filterArrays.put(1, new GLbeautifyFilter(context));
-//        filterArrays.put(1, new BaseFilter(context));
+        filterArrays.put(0, new GLImageOESInputFilter(context));            //无特效
+        filterArrays.put(1, new GLbeautifyFilter(context));                 //美颜特效
+        filterArrays.put(2, new GLImageBorderFilter(context));              //图片叠加
+        filterArrays.put(3, new GLMosaicFilter(context));                   //马赛克
+        filterArrays.put(4, new GLMutilScreenFilter(context));                   //多屏
+        filterArrays.put(5, new GLSplitScreenGuassFilter(context));         //分屏模糊
+        filterArrays.put(6, new BaseFilter(context));
     }
 
     private void releaseFilters(){
@@ -205,12 +217,9 @@ public class RenderManager {
         if(filter instanceof GLImageOESInputFilter){
             ((GLImageOESInputFilter) filter).setmTransformMatrix(matrix);
         }
-        for(int i = 0; i < filterArrays.size() - 1; i++){
-            //这里没有使用返回id导致画面没有画出来
-            currentId = filter.drawFrameBuffer(currentId, vertexBuffer, textureBuffer);
-        }
-        currentId = filterArrays.get(1).drawFrameBuffer(currentId, vertexBuffer, textureBuffer);
-        filterArrays.get(1).drawFrame(currentId, displayVertexBuffer, displayTextureBuffer);
+        currentId = filter.drawFrameBuffer(currentId, vertexBuffer, textureBuffer);
+        currentId = filterArrays.get(effectId).drawFrameBuffer(currentId, vertexBuffer, textureBuffer);
+        filterArrays.get(effectId).drawFrame(currentId, displayVertexBuffer, displayTextureBuffer);
     }
 
     /**

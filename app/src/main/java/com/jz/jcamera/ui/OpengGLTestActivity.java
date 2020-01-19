@@ -28,6 +28,7 @@ public class OpengGLTestActivity extends BaseActivity implements View.OnClickLis
     TextureView textureView;
     TextView fps;
     private CamerPresenter presenter;
+    private PopuWindowManager windowManager;
 
     @Override
     protected int provideLayout() {
@@ -48,8 +49,9 @@ public class OpengGLTestActivity extends BaseActivity implements View.OnClickLis
         fps = $(R.id.fps);
         $(R.id.ic_take).setOnClickListener(this);
         $(R.id.ic_tx).setOnClickListener(this);
-        $(R.id.ic_lib).setOnClickListener(this);
         textureView.setSurfaceTextureListener(this);
+        windowManager = new PopuWindowManager($(R.id.ic_tx), this);
+        windowManager.setListener(this::onItemClick);
     }
 
 
@@ -68,14 +70,16 @@ public class OpengGLTestActivity extends BaseActivity implements View.OnClickLis
 
             //特效
             case R.id.ic_tx:
-
+                windowManager.show();
                 break;
 
-            //图库
-            case R.id.ic_lib:
-
-                break;
         }
+    }
+
+
+
+    public void onItemClick(int index){
+        presenter.setSepecialEffect(index);
     }
 
 

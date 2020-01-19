@@ -459,7 +459,7 @@ int AVMediaWriter::encodeMediaData(AVMediaData *mediaData, int *gotFrame) {
     av_init_packet(&packet);
     //编码
     ret = avcodec_send_frame(codecCtx, frame);
-    if (ret< 0){
+    if (ret < 0){
         if(ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
             return 0;
         }

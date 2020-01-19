@@ -123,7 +123,7 @@ int Recorder::prepare(){
         mFrameFilter->setVideoInput(outputWidth, outputHeight, videoFormat, param->frameRate, param->videoFilter);
         mFrameFilter->setVideoOutput(AV_PIX_FMT_YUV420P);
         mFrameFilter->setAudioInput(param->sampleRate, param->channels, audioFormat, param->audioFilter);
-        if((ret = mFrameFilter->initFilter()) < 0){
+        if((mFrameFilter->initFilter()) < 0){
             delete mFrameFilter;
             mFrameFilter = nullptr;
         } else{
@@ -274,7 +274,7 @@ void Recorder::run() {
             if(ret < 0){
                 LOGE("Failed to encoder media data： %s", data->getName());
             } else{
-                LOGI("recording time: %f", (float)(current - start));
+//                LOGI("recording time: %f", (float)(current - start));
                 if (mRecordListener != nullptr) {
                     mRecordListener->onRecording((float)(current - start));
                 }

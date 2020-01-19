@@ -62,6 +62,14 @@ public final class CamerPresenter implements PCallBack {
         mainHandler = new Handler(Looper.getMainLooper());
     }
 
+    /**
+     * 设置特效
+     * @param effect
+     */
+    public void setSepecialEffect(int effect){
+        renderHandler.sendMessage(renderHandler.obtainMessage(RenderHandler.MSG_SET_EFFECT, effect, 0));
+    }
+
     public void bindSurface(SurfaceTexture surfaceTexture){
         renderHandler.sendMessage(renderHandler.obtainMessage(RenderHandler.MSG_SURFACE_CREATED, surfaceTexture));
     }
@@ -79,10 +87,11 @@ public final class CamerPresenter implements PCallBack {
 
     @Override
     public void showFps(float fps) {
-        if(mainV == null){
-            return;
-        }
         mainHandler.post(() -> {
+            if(mainV == null){
+                return;
+            }
+
             if(mainV.getFpsView() != null){
                 if(mainV.getFpsView() != null){
                     mainV.getFpsView().setText(String.valueOf(fps));

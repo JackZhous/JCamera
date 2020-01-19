@@ -221,6 +221,10 @@ public class RenderThread extends HandlerThread implements SurfaceTexture.OnFram
     }
 
 
+    protected void setEffectId(int id){
+        renderManager.setEffectId(id);
+    }
+
     /**
      * 计算fps
      */

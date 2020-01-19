@@ -104,6 +104,9 @@ public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListene
                     .setAudioParams(audioRecorder.getSampleRate(),
                             AVFormatter.getSampleFormat(audioRecorder.getSampleFormat()),
                             audioRecorder.getChannels())
+                    //黑白特效 lutyuv='u=128:v=128
+                    //drawbox=x=200:y=200:w=300:h=300:color=pink@0.5
+                    .setmVideoFilter("lutyuv='u=128:v=128")
                     .setListener(this)
                     .build();
         recorder.startRecord();
@@ -167,7 +170,7 @@ public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListene
 
     @Override
     public void onRecording(float duration) {
-        JLog.i("java onRecording");
+//        JLog.i("java onRecording");
     }
 
     @Override

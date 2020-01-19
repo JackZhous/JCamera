@@ -309,7 +309,7 @@ static const JNINativeMethod nativeToJavaMethod[] = {
         {"_stopRecord", "(J)V", (void*)stopRecord},
         {"_recordAudioFrame", "(J[BI)V", (void*)recordAudioFrame},
         {"_recordVideoFrame", "(J[BIIII)V", (void*)recordVideoFrame},
-        {"_setFrontCamera", "(J)V", (void*)setFontCamera}
+        {"_setFrontCamera", "(J)V", (void*)setFontCamera},
 };
 
 int registerJavaMethod(JNIEnv* env){
