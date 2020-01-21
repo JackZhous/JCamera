@@ -114,11 +114,13 @@ public class RecorderPresenter implements SurfaceTexture.OnFrameAvailableListene
     }
 
     public void stopRecord(){
-        isRecording = false;
+        if(isRecording){
+            recorder.stopRecord();
+            isRecording = false;
+        }
         audioRecorder.stop();
         cameraHelper.stopPreview();
         cameraHelper.releaseCamera();
-        recorder.stopRecord();
     }
 
 

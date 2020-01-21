@@ -97,6 +97,7 @@ public class FileUtil {
      */
     public static String getVideoCachePath(Context context) {
         String directoryPath;
+
         // 判断外部存储是否可用，如果不可用则使用内部存储路径
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             directoryPath = context.getExternalCacheDir().getAbsolutePath();
